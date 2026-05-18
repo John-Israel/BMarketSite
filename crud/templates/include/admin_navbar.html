@@ -1,0 +1,90 @@
+{% load static %}
+
+<nav class="bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-700">
+  <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+
+    <!-- Brand -->
+    <!-- Brand -->
+<a href="#" class="flex items-center space-x-2 rtl:space-x-reverse">
+  <div class="h-9 w-9 bg-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0">
+    <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M13.5 2C10 2 7 4.5 5.5 8H4a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1h1.05A7.5 7.5 0 0 0 11 17.93V20H9v2h6v-2h-2v-2.07A7.5 7.5 0 0 0 21 11V9.5C21 5.36 17.64 2 13.5 2z"/>
+    </svg>
+  </div>
+  <span class="self-center text-xl text-white font-bold whitespace-nowrap tracking-wide">ShoeShop</span>
+</a>
+
+    <!-- Mobile toggle -->
+    <button data-collapse-toggle="navbar-default" type="button"
+            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-200
+                   rounded-base md:hidden hover:bg-gray-700
+                   focus:outline-none focus:ring-2 focus:ring-gray-600"
+            aria-controls="navbar-default" aria-expanded="false">
+      <span class="sr-only">Open main menu</span>
+      <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+           width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h14"/>
+      </svg>
+    </button>
+
+    <!-- Nav links -->
+    <div class="hidden w-full md:flex md:items-center md:w-auto md:gap-6" id="navbar-default">
+      <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-700 rounded-base
+                 bg-gray-800 md:flex-row md:gap-6 md:mt-0 md:border-0 md:bg-gray-900
+                 rtl:space-x-reverse items-center">
+
+        <!-- Home -->
+        <li>
+          <a href="#"
+             class="block py-2 px-3 text-yellow-400 rounded md:bg-transparent md:text-yellow-400 md:p-0"
+             aria-current="page">
+            Home
+          </a>
+        </li>
+
+        <li>
+          <a href="#"
+             class="flex items-center gap-1.5 py-2 px-3 text-gray-200 rounded
+                    hover:bg-gray-700 md:hover:bg-transparent md:border-0
+                    md:hover:text-yellow-400 md:p-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Products
+          </a>
+        </li>
+
+        <!-- Userlist -->
+        <li>
+          <a href="#"
+             class="flex items-center gap-1.5 py-2 px-3 text-gray-200 rounded
+                    hover:bg-gray-700 md:hover:bg-transparent md:border-0
+                    md:hover:text-yellow-400 md:p-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            Userlist
+          </a>
+        </li>
+
+      </ul>
+
+      <!-- Logout button -->
+      <a href="/page/Log_in"
+         class="flex items-center gap-2 py-2 px-4 bg-red-600 hover:bg-red-700
+                text-white text-sm font-semibold rounded-xl transition-all duration-200
+                shadow-md shadow-red-600/20 hover:shadow-red-600/40 active:scale-95 ml-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Log out
+      </a>
+    </div>
+
+  </div>
+</nav>
