@@ -16,7 +16,7 @@ urlpatterns = [
 
     # Cart (page + AJAX endpoints)
     path('page/cart',         views.cart),
-    path('page/cart/add',     views.cart_add),
+    path('page/cart/add/<int:productId>/',     views.cart_add),
     path('page/cart/update',  views.cart_update),
     path('page/cart/remove',  views.cart_remove),
 

@@ -35,7 +35,7 @@
         <label for="cod"
                class="flex items-center gap-4 p-5 bg-gray-900 border-2 border-gray-800 rounded-2xl cursor-pointer hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group"
                id="cod-label">
-          <input type="radio" name="payment_method" id="cod" value="cod" class="hidden" onchange="selectMethod('cod')">
+          <input type="radio" name="payment_method" id="cod" value="Cash on Delivery" class="hidden" onchange="selectMethod('cod')">
           <div class="w-12 h-12 bg-gray-800 group-hover:bg-yellow-400 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200" id="cod-icon-bg">
             <svg class="w-6 h-6 text-yellow-400 transition-colors duration-200" id="cod-icon"
                  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
@@ -55,7 +55,7 @@
         <label for="gcash"
                class="flex items-center gap-4 p-5 bg-gray-900 border-2 border-gray-800 rounded-2xl cursor-pointer hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group"
                id="gcash-label">
-          <input type="radio" name="payment_method" id="gcash" value="gcash" class="hidden" onchange="selectMethod('gcash')">
+          <input type="radio" name="payment_method" id="gcash" value="GCash" class="hidden" onchange="selectMethod('gcash')">
           <div class="w-12 h-12 bg-gray-800 group-hover:bg-yellow-400 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200" id="gcash-icon-bg">
             <svg class="w-6 h-6 text-yellow-400 transition-colors duration-200" id="gcash-icon"
                  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 14 20">
@@ -114,14 +114,14 @@
         {% for item in cart_items %}
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-            <img src="{{ item.img }}" alt="{{ item.name }}" class="w-full h-full object-contain p-1"/>
+            <img src="{{ item.product_name.product_image.url }}" alt="{{ item.product_name }}" class="w-full h-full object-contain p-1"/>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-white text-sm font-semibold truncate">{{ item.name }}</p>
-            <p class="text-gray-500 text-xs">x{{ item.qty }}</p>
+            <p class="text-white text-sm font-semibold truncate">{{ item.product_name }}</p>
+            <p class="text-gray-500 text-xs">x{{ item.quantity }}</p>
           </div>
           <span class="text-yellow-400 font-bold text-sm shrink-0">
-            &#8369;{% widthratio item.price 1 item.qty %}
+            &#8369;{% widthratio item.product_price 1 item.quantity %}
           </span>
         </div>
         {% endfor %}

@@ -87,6 +87,7 @@ class Cart(models.Model):
     class Meta:
         db_table = 'cart_tbl'
     cart_id =  models.BigAutoField(primary_key=True, blank=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, blank=True)
     product_name = models.ForeignKey(Products, on_delete=models.CASCADE)
     product_price = models.IntegerField(default=1, blank=False)
     quantity = models.IntegerField(default=0, blank=False)

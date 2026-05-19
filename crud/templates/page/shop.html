@@ -14,40 +14,42 @@
     <p class="text-gray-400 mt-2 text-sm tracking-wide">Step Into Excellence</p>
     <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
   </div>
+    <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
 
-  <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      {% for product in products %}
+      <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
+          data-product-id="{{ product.product_id }}"
+          data-name="{{ product.product_name }}"
+          data-brand="{{ product.product_brand }}"
+          data-price="{{ product.price }}"
+          data-quantity="{{ product.product_quantity }}"
+          data-img="{% if product.product_image %}{{ product.product_image.url }}{% endif %}">
 
-    {% for shoe in shoes %}
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="{{ shoe.name }}"
-         data-desc="{{ shoe.desc }}"
-         data-price="{{ shoe.price }}"
-         data-old="{{ shoe.old }}"
-         data-img="{% static shoe.img %}">
-
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static shoe.img %}" alt="{{ shoe.name }}"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
+        <div class="relative overflow-hidden h-56 bg-gray-100">
+          {% if product.product_image %}
+            <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}" class="product-img w-full h-full object-contain p-3 transition-transform duration-500">
+          {% else %}
+            <span class="text-gray-400">No Image</span>
+          {% endif %}
+          <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
+            <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
+              Add to Cart
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">{{ shoe.name }}</h2>
-        <p class="text-gray-400 text-xs mt-1">{{ shoe.desc }}</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">&#8369;{{ shoe.price }}</span>
-          <span class="text-xs text-gray-500 line-through">&#8369;{{ shoe.old }}</span>
+        <div class="p-4">
+          <h2 class="text-white font-semibold text-base tracking-wide">{{ product.product_name }}</h2>
+          <p class="text-gray-400 text-xs mt-1">{{ product.product_brand }}</p>
+          <div class="flex items-center justify-between mt-3">
+            <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.price }}</span>
+            <span class="text-xs text-gray-500 line-through">&#8369;{{ product.product_quantity }}</span>
+          </div>
         </div>
-      </div>
 
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-
-  </div>
 </div>
 
 <script>
@@ -85,7 +87,7 @@
     var btn     = card.querySelector('.overlay-btn');
 
     card.addEventListener('mouseenter', function() {
-      img.style.transform           = 'scale(1.08)';
+      if (img) img.style.transform           = 'scale(1.08)';  // ✅ guard
       overlay.style.backgroundColor = 'rgba(250,204,21,0.15)';
       btn.style.opacity             = '1';
       btn.style.transform           = 'translateY(0)';
@@ -95,7 +97,7 @@
     });
 
     card.addEventListener('mouseleave', function() {
-      img.style.transform           = 'scale(1)';
+      if (img) img.style.transform           = 'scale(1)';     // ✅ guard
       overlay.style.backgroundColor = 'rgba(0,0,0,0)';
       btn.style.opacity             = '0';
       btn.style.transform           = 'translateY(10px)';
@@ -105,11 +107,13 @@
     });
 
     btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      btn.disabled    = true;
-      btn.textContent = 'Adding...';
+    e.stopPropagation();
+    btn.disabled    = true;
+    btn.textContent = 'Adding...';
 
-      fetch('/page/cart/add', {
+    
+
+      fetch('/page/cart/add/' + card.dataset.productId + '/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,13 +121,11 @@
         },
         body: JSON.stringify({
           name:  card.dataset.name,
-          desc:  card.dataset.desc,
           price: card.dataset.price,
-          old:   card.dataset.old,
           img:   card.dataset.img,
         }),
       })
-      .then(function(res) { return res.json(); })
+      .then(function(res)  { return res.json(); })
       .then(function(data) {
         if (data.success) {
           showToast('Added to Cart!', 'success');

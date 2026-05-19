@@ -17,32 +17,35 @@
 
   <div class="max-w-screen-xl mx-auto flex flex-col lg:flex-row gap-8">
 
-    {% if cart_items %}
+    {% if cart %}
 
       <div class="flex-1" id="cart-items">
-        {% for item in cart_items %}
+        {% for item in cart %}
         <div class="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4 shadow-md">
 
           <div class="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden shrink-0">
-            <img src="{{ item.img }}" alt="{{ item.name }}" class="w-full h-full object-contain p-1"/>
+            {% if item.product_name.product_image %}
+              <img src="{{ item.product_name.product_image.url }}" alt="{{ item.product_name.product_name }}" class="w-full h-full object-contain p-1"/>
+            {% else %}
+              <span class="text-gray-400">No Image</span>
+            {% endif %}
           </div>
 
           <div class="flex-1">
-            <h3 class="text-white font-semibold text-base">{{ item.name }}</h3>
-            <p class="text-gray-400 text-xs mt-0.5">{{ item.desc }}</p>
+            <h3 class="text-white font-semibold text-base">{{ item.product_name.product_name }}</h3>
             <div class="flex items-center gap-3 mt-3">
-              <a href="/page/cart/update?index={{ forloop.index0 }}&delta=-1"
+              <a href="/page/cart/update?cart_id={{ item.cart_id }}&amp;delta=-1"
                  class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">&#8722;</a>
-              <span class="text-white font-semibold text-sm">{{ item.qty }}</span>
-              <a href="/page/cart/update?index={{ forloop.index0 }}&delta=1"
+              <span class="text-white font-semibold text-sm" name="quantity" id="quantity-{{ forloop.index0 }}">{{ item.quantity }}</span>
+              <a href="/page/cart/update?cart_id={{ item.cart_id }}&amp;delta=1"
                  class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">&#43;</a>
             </div>
           </div>
 
           <div class="text-right flex flex-col items-end gap-2">
-            <span class="text-yellow-400 font-bold text-lg">&#8369;{{ item.price|floatformat:"0" }}</span>
-            <span class="text-gray-500 text-xs line-through">&#8369;{{ item.old|floatformat:"0" }}</span>
-            <a href="/page/cart/remove?index={{ forloop.index0 }}"
+            <span class="text-yellow-400 font-bold text-lg">&#8369;{{ item.product_price|floatformat:"0" }}</span>
+            <span class="text-gray-500 text-xs line-through">&#8369;{{ item.product_price|floatformat:"0" }}</span>
+            <a href="/page/cart/remove?cart_id={{ item.cart_id }}"
                class="mt-2 text-red-500 hover:text-red-400 text-xs font-semibold transition-all duration-200">
               Remove
             </a>

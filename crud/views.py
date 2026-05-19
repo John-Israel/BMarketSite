@@ -3,8 +3,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib import messages
-from .models import Users, Genders, Admin, Products, Product_Gender
+from .models import Payment, Users, Genders, Admin, Products, Product_Gender, Cart, History
 import json
+from django.db.models import Sum
 
 
 def Log_in(request):
@@ -31,6 +32,15 @@ def Log_in(request):
             return render(request, 'page/Log_in.html')
     except Exception as e:
         return HttpResponse(f"An error occurred during login: {e}")
+
+def get_current_user(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return None
+    try:
+        return Users.objects.get(pk=user_id)
+    except Users.DoesNotExist:
+        return None
 
 
 def home(request):
@@ -60,106 +70,91 @@ def home(request):
     })
 
 def shop(request):
-    shoes = [
-        {'name': 'Classic Runner',  'desc': 'Premium leather sole',    'price': 2499, 'old': 3200, 'img': 'picture/shop/shoes1.png'},
-        {'name': 'Urban Elite',     'desc': 'Breathable mesh upper',   'price': 2799, 'old': 3500, 'img': 'picture/shop/shoes2.png'},
-        {'name': 'Street King',     'desc': 'Rubber grip outsole',     'price': 1999, 'old': 2800, 'img': 'picture/shop/shoes3.png'},
-        {'name': 'Gold Series',     'desc': 'Limited edition drop',    'price': 3499, 'old': 4200, 'img': 'picture/shop/shoes4.png'},
-        {'name': 'Night Stepper',   'desc': 'Reflective detailing',    'price': 2299, 'old': 3000, 'img': 'picture/shop/shoes5.png'},
-        {'name': 'Apex Trainer',    'desc': 'Dual-density cushioning', 'price': 2999, 'old': 3800, 'img': 'picture/shop/shoes6.png'},
-        {'name': 'Phantom Pro',     'desc': 'Lightweight foam base',   'price': 3199, 'old': 4000, 'img': 'picture/shop/shoes7.png'},
-        {'name': 'Velo Boost',      'desc': 'Speed-engineered sole',   'price': 2699, 'old': 3400, 'img': 'picture/shop/shoes8.png'},
-        {'name': 'Terra Grip',      'desc': 'All-terrain outsole',     'price': 2899, 'old': 3600, 'img': 'picture/shop/shoes9.png'},
-        {'name': 'Crown Edition',   'desc': 'Signature collection',    'price': 3999, 'old': 4800, 'img': 'picture/shop/shoes10.png'},
-    ]
-    return render(request, 'page/shop.html', {'shoes': shoes})
+    try:
+        products = Products.objects.select_related('product_gender')
+        data = {
+            'products': products
+        }
+        return render(request, 'page/shop.html', data)
+    except Exception as e:
+        return HttpResponse(f"An error occurred during shop view: {e}")
 
 
 # ── Cart helpers ──────────────────────────────────────────────────────────────
 
-def get_cart(request):
-    if 'cart' not in request.session:
-        request.session['cart'] = []
-    return request.session['cart']
-
-def save_cart(request, cart):
-    request.session['cart'] = cart
-    request.session.modified = True
-
-
 def cart(request):
-    cart_items = get_cart(request)
-    
-    # Safe fallback wrapper to ensure empty prices don't trigger base 10 int errors
-    subtotal = sum(int(item['price'] if item['price'] else 0) * item['qty'] for item in cart_items)
-    
-    return render(request, 'page/cart.html', {
-        'cart_items': cart_items,
-        'subtotal':   subtotal,
-        'total':      subtotal,
-    })
+    try:
+        cart = Cart.objects.select_related('product_name')
+        subtotal = sum(int(item.product_price if item.product_price else 0) * item.quantity for item in cart)
+        data = {
+            'cart': cart,
+            'subtotal': subtotal,
+            'total': subtotal,
+        }
+        return render(request, 'page/cart.html', data)
+    except Exception as e:
+        return HttpResponse(f"An error occurred during cart retrieval: {e}")
 
 
-def cart_add(request):
+def cart_add(request, productId):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            if 'cart' not in request.session:
-                request.session['cart'] = []
-            cart = request.session['cart']
-            existing = next((i for i in cart if i['name'] == data.get('name')), None)
-            if existing:
-                existing['qty'] += 1
-            else:
-                cart.append({
-                    'name':  data.get('name'),
-                    'desc':  data.get('desc'),
-                    'price': data.get('price'),
-                    'old':   data.get('old'),
-                    'img':   data.get('img'),
-                    'qty':   1,
-                })
-            request.session['cart'] = cart
-            request.session.modified = True
-            return JsonResponse({'success': True, 'cart_count': sum(i['qty'] for i in cart)})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-    return JsonResponse({'success': False})
+            user = get_current_user(request)
+            product = Products.objects.get(pk=productId)
 
+            cart_item, created = Cart.objects.get_or_create(
+                product_name=product,
+                user=user,          # ← scope to the logged-in user
+                defaults={
+                    'product_price': product.product_price,
+                    'quantity': 1
+                }
+            )
+            if not created:
+                cart_item.quantity += 1
+                cart_item.save()
+
+            return JsonResponse({'success': True})
+
+        except Products.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Product not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
 # ── Updated Safe View Logic ───────────────────────────────────────────────────
 
 def cart_update(request):
-    try:
-        idx_raw = request.GET.get('index')
-        dlta_raw = request.GET.get('delta')
+    cart_id = request.GET.get('cart_id')
+    delta_raw = request.GET.get('delta', '0').strip()
+    delta = int(delta_raw) if delta_raw.lstrip('-').isdigit() else 0
 
-        # Checks whether the data exists and is a true digit before evaluating int()
-        index = int(idx_raw) if idx_raw and idx_raw.strip().replace('-', '').isdigit() else 0
-        delta = int(dlta_raw) if dlta_raw and dlta_raw.strip().replace('-', '').isdigit() else 0
-        
-        cart = request.session.get('cart', [])
-        if 0 <= index < len(cart):
-            cart[index]['qty'] += delta
-            if cart[index]['qty'] <= 0:
-                cart.pop(index)
-        request.session['cart'] = cart
-        request.session.modified = True
-    except Exception as e:
-        messages.error(request, f'Could not update cart: {e}')
+    if cart_id is not None:
+        try:
+            cart_item = Cart.objects.get(cart_id=cart_id)
+            cart_item.quantity += delta
+
+            if cart_item.quantity <= 0:
+                        cart_item.delete()
+            else:
+                cart_item.save()
+
+        except Cart.DoesNotExist:
+            pass
+
+        # sync session to match DB
+    updated_cart = list(
+        Cart.objects.values('cart_id', 'product_name_id', 'product_price', 'quantity')
+    )
     return redirect('/page/cart')
 
 
 def cart_remove(request):
     try:
-        idx_raw = request.GET.get('index')
-        index = int(idx_raw) if idx_raw and idx_raw.strip().isdigit() else 0
-        
-        cart = request.session.get('cart', [])
-        if 0 <= index < len(cart):
-            cart.pop(index)
-        request.session['cart'] = cart
-        request.session.modified = True
+        cart_id = request.GET.get('cart_id')
+        if cart_id is not None:
+            Cart.objects.filter(cart_id=cart_id).delete()
     except Exception as e:
         messages.error(request, f'Could not remove item: {e}')
     return redirect('/page/cart')
@@ -167,32 +162,56 @@ def cart_remove(request):
 
 # ── Payment ───────────────────────────────────────────────────────────────────
 
+
 def payment(request):
-    cart_items = get_cart(request)
-    if not cart_items:
+    user = get_current_user(request)
+    cart_items = Cart.objects.filter(user=user)
+
+    if not cart_items.exists():
         return redirect('/page/cart')
-        
-    subtotal = sum(int(item['price'] if item['price'] else 0) * item['qty'] for item in cart_items)
+
+    subtotal = sum(item.product_price * item.quantity for item in cart_items)
 
     if request.method == 'POST':
-        method       = request.POST.get('payment_method')
+        method_name  = request.POST.get('payment_method')  # should be 'Cash on Delivery' or 'GCash'
         gcash_number = request.POST.get('gcash_number', '')
         gcash_name   = request.POST.get('gcash_name', '')
+
+        try:
+            payment_method = Payment.objects.get(payment_method=method_name)
+        except Payment.DoesNotExist:
+            messages.error(request, 'Invalid payment method.')
+            return redirect('/page/payment')
+
+        # save each cart item as a History record
+        for item in cart_items:
+            History.objects.create(
+                buyer          = user,
+                product_name   = item.product_name,
+                quantity       = item.quantity,
+                payment_method = payment_method,
+                product_price  = item.product_price,
+            )
+
+        # clear the cart after order is placed
+        cart_items.delete()
+
         request.session['last_order'] = {
-            'items':        cart_items,
             'subtotal':     subtotal,
-            'method':       method,
+            'method':       method_name,
             'gcash_number': gcash_number,
             'gcash_name':   gcash_name,
+            'buyer_name':   user.full_name,
         }
-        save_cart(request, [])
+
         messages.success(request, 'Order placed successfully!')
-        return redirect('/page/home')
+        return redirect('/page/shop')
 
     return render(request, 'page/payment.html', {
         'cart_items': cart_items,
         'subtotal':   subtotal,
         'total':      subtotal,
+        'user':       user,
     })
 
 
