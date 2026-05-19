@@ -5,10 +5,13 @@
 
 {% block 'content' %}
 {% include "include/admin_navbar.html" %}
+{% include "layout/admin_toast.html" %}
 
-{% static 'include/picture/home/home.png' as home_img %}
-<div class="min-h-screen bg-cover bg-center bg-no-repeat" 
+<div class="min-h-screen bg-cover bg-center bg-no-repeat relative transition-all duration-300"
      style="background-image: url('{% static 'picture/home/home.png' %}');">
+
+  <div class="absolute inset-0 bg-white/20 dark:bg-black/50 transition-colors duration-300"></div>
+
 </div>
 
 {% endblock 'content' %}

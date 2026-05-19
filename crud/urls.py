@@ -13,8 +13,10 @@ urlpatterns = [
     path('page/home',    views.home),
     path('page/shop',    views.shop),
     path('page/contact', views.contact),
-
+    path('page/history', views.history),
     # Cart (page + AJAX endpoints)
+    path('page/manage',         views.manage),        # manage account page
+    path('page/delete_account', views.delete_account),
     path('page/cart',         views.cart),
     path('page/cart/add',     views.cart_add),
     path('page/cart/update',  views.cart_update),
@@ -30,4 +32,5 @@ urlpatterns = [
     path('admin/delete_product/<int:id>', views.delete_product),
     path('admin/update_product/<int:productId>', views.update_product),
     path('admin/user_list', views.user_list),
+    path('admin/delete_user/<int:user_id>', views.delete_user),
 ]   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

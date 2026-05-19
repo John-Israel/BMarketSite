@@ -3,24 +3,22 @@
 
 {% block 'title' %} Add Product {% endblock 'title' %}
 
-
-
 {% block 'content' %}
 {% include "include/admin_navbar.html" %}
 
-<div class="p-2 sm:ml-32 mt-24 md:mt-32">
+<div class="p-2 sm:ml-32 mt-24 md:mt-32 min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
     <div class="mx-auto w-full md:w-2/3 mb-6">
         <form action="/admin/add_product" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="bg-white border border-gray-200 rounded-2xl p-10 shadow-xl">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-10 shadow-xl transition-colors duration-300">
 
                 <!-- Header -->
-                <div class="mb-6 border-b border-gray-100 pb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">Add New Product</h2>
+                <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white transition-colors duration-300">Add New Product</h2>
                     <p class="text-sm text-gray-400 mt-0.5">Fill in the details below to create a new product.</p>
                 </div>
 
-                <!-- Profile Picture Upload -->
+                <!-- Image Upload -->
                 <div class="flex flex-col items-center mb-6">
                     <label for="product_image" class="cursor-pointer group flex flex-col items-center">
                         <div class="relative">
@@ -44,45 +42,41 @@
 
                 <!-- Form Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-
                     <div>
-                        <label for="product_name" class="block text-sm font-medium text-gray-700 mb-1.5">Product Name</label>
+                        <label for="product_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Product Name</label>
                         <input type="text" name="product_name" id="product_name" required
-                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
-                            placeholder="apple" />
+                            class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
+                            placeholder="Product name" />
                     </div>
-
                     <div>
-                        <label for="brand" class="block text-sm font-medium text-gray-700 mb-1.5">Brand</label>
+                        <label for="brand" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Brand</label>
                         <input type="text" name="brand" id="brand" required
-                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
+                            class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
                             placeholder="Brand Name" />
                     </div>
-
                     <div>
-                        <label for="product_gender" class="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
+                        <label for="product_gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Gender</label>
                         <select name="product_gender" id="product_gender" required
-                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             <option value="">Select Gender</option>
                             {% for product_gender in product_genders %}
                                 <option value="{{ product_gender.product_gender_id }}">{{ product_gender.product_gender }}</option>
                             {% endfor %}
                         </select>
                     </div>
-
                     <div>
-                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1.5">Price</label>
+                        <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Price</label>
                         <input type="number" name="price" id="price" required
-                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
+                            class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
                             placeholder="0.00" />
                     </div>
-
                     <div>
-                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1.5">Quantity</label>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Quantity</label>
                         <input type="number" name="quantity" id="quantity" required
-                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
+                            class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
                             placeholder="0" />
                     </div>
+                </div>
 
                 <!-- Submit -->
                 <div class="flex justify-center mt-6">
@@ -93,7 +87,7 @@
                         </svg>
                         Add Product
                     </button>
-                    <a href="/admin/product_list" class="bg-white text-sm font-medium text-black px-3 py-2.5 mr-1 rounded-sm shadow-sm cursor-pointer hover:bg-gray-100 hover:outline-none ml-4">Back</a>
+                    <a href="/admin/product_list" class="bg-gray-100 dark:bg-gray-700 text-sm font-medium text-black dark:text-white px-3 py-2.5 rounded-sm shadow-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 ml-4 transition-colors duration-200">Back</a>
                 </div>
 
             </div>
@@ -103,18 +97,18 @@
 
 <script>
     document.getElementById('product_image').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = document.getElementById('preview_img');
-                    img.src = e.target.result;
-                    img.classList.remove('p-3', 'bg-gray-50', 'border-dashed');
-                    img.classList.add('w-24', 'h-24', 'rounded-full', 'object-cover', 'border-solid');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById('preview_img');
+                img.src = e.target.result;
+                img.classList.remove('p-3', 'bg-gray-50', 'border-dashed');
+                img.classList.add('w-24', 'h-24', 'rounded-full', 'object-cover', 'border-solid');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 </script>
 
 {% endblock 'content' %}

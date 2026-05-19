@@ -178,13 +178,24 @@ def payment(request):
         method       = request.POST.get('payment_method')
         gcash_number = request.POST.get('gcash_number', '')
         gcash_name   = request.POST.get('gcash_name', '')
-        request.session['last_order'] = {
+
+        order = {
             'items':        cart_items,
             'subtotal':     subtotal,
             'method':       method,
             'gcash_number': gcash_number,
             'gcash_name':   gcash_name,
+            'date':         __import__('datetime').datetime.now().strftime('%B %d, %Y %I:%M %p'),
         }
+
+        # Save to last_order AND append to order_history
+        request.session['last_order'] = order
+
+        history = request.session.get('order_history', [])
+        history.append(order)
+        request.session['order_history'] = history
+        request.session.modified = True
+
         save_cart(request, [])
         messages.success(request, 'Order placed successfully!')
         return redirect('/page/home')
@@ -194,10 +205,16 @@ def payment(request):
         'subtotal':   subtotal,
         'total':      subtotal,
     })
-
-
 # ── Contact ───────────────────────────────────────────────────────────────────
-
+def history(request):
+    orders = request.session.get('order_history', [])
+    total_items = sum(item['qty'] for order in orders for item in order['items'])
+    total_spent = sum(order['subtotal'] for order in orders)
+    return render(request, 'page/history.html', {
+        'orders':      orders,
+        'total_items': total_items,
+        'total_spent': total_spent,
+    })
 def contact(request):
     return render(request, 'page/contact.html')
 
@@ -247,7 +264,80 @@ def sign_up(request):
             return render(request, 'page/sign_up.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during add user: {e}")
+    
+def manage(request):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return redirect('/page/Log_in')
 
+        user = Users.objects.get(pk=user_id)
+
+        if request.method == 'POST':
+            full_name      = request.POST.get('full_name')
+            email          = request.POST.get('email')
+            gender         = request.POST.get('gender')
+            birth_date     = request.POST.get('birth_date')
+            contact_number = request.POST.get('contact_number')
+            address        = request.POST.get('address')
+            new_password   = request.POST.get('new_password')
+            confirm_new    = request.POST.get('confirm_new_password')
+            profile_pic    = request.FILES.get('profile_pic')
+
+            # Password change is optional — only update if provided
+            if new_password:
+                if new_password != confirm_new:
+                    messages.error(request, 'Passwords do not match!')
+                    return redirect('/page/manage')
+                if len(new_password) < 8:
+                    messages.error(request, 'Password must be at least 8 characters!')
+                    return redirect('/page/manage')
+                user.password = make_password(new_password)
+
+            user.full_name      = full_name
+            user.email          = email
+            user.gender         = Genders.objects.get(pk=gender)
+            user.birthdate      = birth_date
+            user.contact_number = contact_number
+            user.address        = address
+
+            if profile_pic:
+                user.profile_pic = profile_pic
+
+            user.save()
+            messages.success(request, 'Account updated successfully!')
+            return redirect('/page/manage')
+
+        genders = Genders.objects.all()
+        return render(request, 'page/manage.html', {
+            'user':    user,
+            'genders': genders,
+        })
+
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
+
+
+def delete_account(request):
+    try:
+        if request.method == 'POST':
+            user_id = request.session.get('user_id')
+            if not user_id:
+                return redirect('/page/Log_in')
+
+            user = Users.objects.get(pk=user_id)
+            user.delete()
+
+            # Clear the session so they're fully logged out
+            request.session.flush()
+
+            messages.success(request, 'Your account has been deleted.')
+            return redirect('/page/Log_in')
+
+        return redirect('/page/manage')
+
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
 
 # ── Admin ─────────────────────────────────────────────────────────────────────
 
@@ -378,3 +468,14 @@ def admin_delete_product(request):
         except Exception as e:
             messages.error(request, f'Error deleting product: {e}')
     return redirect('/admin/stack')
+
+def delete_user(request, user_id):
+    try:
+        if request.method == 'POST':
+            user = Users.objects.get(pk=user_id)
+            user.delete()
+            messages.success(request, f'User deleted successfully.')
+            return redirect('/admin/user_list')
+        return redirect('/admin/user_list')
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
