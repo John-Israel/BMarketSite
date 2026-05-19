@@ -1,0 +1,62 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block 'title' %} Add Product {% endblock 'title' %}
+
+{% block 'content' %}
+{% include "include/admin_navbar.html" %}
+
+<div class="p-2 sm:ml-32 mt-24 md:mt-32">
+    <div class="mx-auto w-full md:w-2/3 mb-6">
+        <form action="/admin/update_product/{{ product.product_id }}" method="post">
+            {% csrf_token %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-10 shadow-xl">
+
+                <!-- Header -->
+                <div class="mb-6 border-b border-gray-100 pb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">Update Product</h2>
+                    <p class="text-sm text-gray-400 mt-0.5">Fill in the details below to update the product.</p>
+                </div>
+
+                <div class="flex flex-col items-center mb-4">
+                    {% if product.product_image %}
+                        <img src="{{ product.product_image.url }}" alt="Product Image" class="w-24 h-24 rounded-full object-cover border border-gray-300 mb-2"/>
+                    {% else %}
+                        <div class="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center mb-2">
+                            <span class="text-gray-600 text-2xl font-bold">{{ product.product_name|first|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <p class="text-sm font-semibold">{{ product.product_name }}</p>
+                </div>
+
+                <!-- Form Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1.5">Price</label>
+                        <input type="number" name="price" id="price" value="{{ product.product_price }}" required
+                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
+                            placeholder="0.00" />
+                    </div>
+
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1.5">Quantity</label>
+                        <input type="number" name="quantity" id="quantity" value="{{ product.product_quantity }}" required
+                            class="bg-white px-3 py-2.5 border border-gray-300 text-gray-900 text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition placeholder-gray-300"
+                            placeholder="0" />
+                    </div>
+                <!-- Submit -->
+                <div class="flex justify-center mt-6">
+                    <button type="submit" id="submit_btn"
+                        class="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-medium px-6 py-2.5 rounded-lg shadow-sm cursor-pointer transition-colors duration-150 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Update Product
+                    </button>
+                    <a href="/admin/product_list" class="bg-white text-sm font-medium text-black px-3 py-2.5 mr-1 rounded-sm shadow-sm cursor-pointer hover:bg-gray-100 hover:outline-none ml-4">Back</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock 'content' %}
