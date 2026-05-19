@@ -1,0 +1,33 @@
+{% if messages %}
+  {% for msg in messages %}
+  <div
+    id="django-toast-{{ forloop.counter }}"
+    style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.4);font-weight:700;font-size:14px;opacity:0;transform:translateY(16px);transition:all 0.4s ease;background:{% if msg.tags == 'success' %}#facc15{% else %}#ef4444{% endif %};color:{% if msg.tags == 'success' %}#111827{% else %}#ffffff{% endif %};"
+  >
+    {% if msg.tags == 'success' %}
+      <svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+      </svg>
+    {% else %}
+      <svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+      </svg>
+    {% endif %}
+    <span>{{ msg }}</span>
+  </div>
+  <script>
+    (function() {
+      var el = document.getElementById('django-toast-{{ forloop.counter }}');
+      requestAnimationFrame(function() {
+        el.style.opacity   = '1';
+        el.style.transform = 'translateY(0)';
+      });
+      setTimeout(function() {
+        el.style.opacity   = '0';
+        el.style.transform = 'translateY(16px)';
+        setTimeout(function() { el.remove(); }, 400);
+      }, 3000);
+    })();
+  </script>
+  {% endfor %}
+{% endif %}

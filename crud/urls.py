@@ -5,12 +5,22 @@ from . import views
 
 
 urlpatterns = [
-    # user authentication and page navigation for users
-    path('page/Log_in', views.Log_in),
+    # User auth
+    path('page/Log_in',  views.Log_in),
     path('page/sign_up', views.sign_up),
-    path('page/home', views.home),
-    path('page/shop', views.shop),
-    path('page/cart', views.cart),
+
+    # User pages
+    path('page/home',    views.home),
+    path('page/shop',    views.shop),
+    path('page/contact', views.contact),
+
+    # Cart (page + AJAX endpoints)
+    path('page/cart',         views.cart),
+    path('page/cart/add',     views.cart_add),
+    path('page/cart/update',  views.cart_update),
+    path('page/cart/remove',  views.cart_remove),
+
+    # Payment
     path('page/payment', views.payment),
 
     # admin authentication and page navigation for admin
