@@ -5,10 +5,10 @@
 
 {% block 'content' %}
 {% include "include/navbar.html" %}
+{% include "include/toast.html" %}
 
 <div class="min-h-screen bg-gray-950 pt-20 pb-12 px-4">
 
-  <!-- Header -->
   <div class="max-w-screen-xl mx-auto mb-10 text-center">
     <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Your Cart</h1>
     <p class="text-gray-400 mt-2 text-sm tracking-wide">Review your selected items</p>
@@ -17,133 +17,84 @@
 
   <div class="max-w-screen-xl mx-auto flex flex-col lg:flex-row gap-8">
 
-    <!-- Cart Items -->
-    <div class="flex-1" id="cart-items">
-      <!-- Filled by JS -->
-    </div>
+    {% if cart_items %}
 
-    <!-- Empty state -->
-    <div id="empty-cart" class="hidden flex-1 flex flex-col items-center justify-center text-center py-24">
-      <svg class="w-20 h-20 text-gray-700 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 0 1-8 0"/>
-      </svg>
-      <p class="text-gray-500 text-lg font-semibold">Your cart is empty</p>
-      <a href="/page/shop" class="mt-6 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-xl hover:bg-yellow-300 transition-all duration-200">
-        Browse Shop
-      </a>
-    </div>
+      <div class="flex-1" id="cart-items">
+        {% for item in cart_items %}
+        <div class="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4 shadow-md">
 
-    <!-- Order Summary -->
-    <div id="order-summary" class="hidden lg:w-80 bg-gray-900 rounded-2xl border border-gray-800 p-6 h-fit shadow-xl">
-      <h2 class="text-white font-bold text-xl mb-6 tracking-wide">Order Summary</h2>
+          <div class="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden shrink-0">
+            <img src="{{ item.img }}" alt="{{ item.name }}" class="w-full h-full object-contain p-1"/>
+          </div>
 
-      <div class="flex justify-between text-gray-400 text-sm mb-3">
-        <span>Subtotal</span>
-        <span id="subtotal">₱0</span>
+          <div class="flex-1">
+            <h3 class="text-white font-semibold text-base">{{ item.name }}</h3>
+            <p class="text-gray-400 text-xs mt-0.5">{{ item.desc }}</p>
+            <div class="flex items-center gap-3 mt-3">
+              <a href="/page/cart/update?index={{ forloop.index0 }}&delta=-1"
+                 class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">&#8722;</a>
+              <span class="text-white font-semibold text-sm">{{ item.qty }}</span>
+              <a href="/page/cart/update?index={{ forloop.index0 }}&delta=1"
+                 class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">&#43;</a>
+            </div>
+          </div>
+
+          <div class="text-right flex flex-col items-end gap-2">
+            <span class="text-yellow-400 font-bold text-lg">&#8369;{{ item.price|floatformat:"0" }}</span>
+            <span class="text-gray-500 text-xs line-through">&#8369;{{ item.old|floatformat:"0" }}</span>
+            <a href="/page/cart/remove?index={{ forloop.index0 }}"
+               class="mt-2 text-red-500 hover:text-red-400 text-xs font-semibold transition-all duration-200">
+              Remove
+            </a>
+          </div>
+
+        </div>
+        {% endfor %}
       </div>
-      <div class="flex justify-between text-gray-400 text-sm mb-3">
-        <span>Shipping</span>
-        <span class="text-green-400">Free</span>
-      </div>
-      <div class="border-t border-gray-700 my-4"></div>
-      <div class="flex justify-between text-white font-bold text-lg mb-6">
-        <span>Total</span>
-        <span id="total" class="text-yellow-400">₱0</span>
+
+      <div class="lg:w-80 bg-gray-900 rounded-2xl border border-gray-800 p-6 h-fit shadow-xl">
+        <h2 class="text-white font-bold text-xl mb-6 tracking-wide">Order Summary</h2>
+        <div class="flex justify-between text-gray-400 text-sm mb-3">
+          <span>Subtotal</span>
+          <span class="text-gray-200">&#8369;{{ subtotal|floatformat:"0" }}</span>
+        </div>
+        <div class="flex justify-between text-gray-400 text-sm mb-3">
+          <span>Shipping</span>
+          <span class="text-green-400">Free</span>
+        </div>
+        <div class="border-t border-gray-700 my-4"></div>
+        <div class="flex justify-between text-white font-bold text-lg mb-6">
+          <span>Total</span>
+          <span class="text-yellow-400">&#8369;{{ total|floatformat:"0" }}</span>
+        </div>
+        <a href="/page/payment"
+           class="block w-full text-center bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 px-6 rounded-xl transition-all duration-200 active:scale-95">
+          Proceed to Payment
+        </a>
+        <a href="/page/shop"
+           class="block w-full text-center mt-3 text-gray-400 hover:text-yellow-400 text-sm transition-all duration-200">
+          &#8592; Continue Shopping
+        </a>
       </div>
 
-      <a href="/page/payment"
-         class="block w-full text-center bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 px-6 rounded-xl transition-all duration-200 active:scale-95">
-        Proceed to Payment
-      </a>
-      <a href="/page/shop"
-         class="block w-full text-center mt-3 text-gray-400 hover:text-yellow-400 text-sm transition-all duration-200">
-        ← Continue Shopping
-      </a>
-    </div>
+    {% else %}
+
+      <div class="flex-1 flex flex-col items-center justify-center text-center py-24">
+        <svg class="w-20 h-20 text-gray-700 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <p class="text-gray-500 text-lg font-semibold">Your cart is empty</p>
+        <a href="/page/shop"
+           class="mt-6 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-xl hover:bg-yellow-300 transition-all duration-200">
+          Browse Shop
+        </a>
+      </div>
+
+    {% endif %}
 
   </div>
 </div>
-
-<script>
-  function formatPrice(n) {
-    return '₱' + parseInt(n).toLocaleString();
-  }
-
-  function renderCart() {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const container = document.getElementById('cart-items');
-    const emptyState = document.getElementById('empty-cart');
-    const summary = document.getElementById('order-summary');
-
-    if (cart.length === 0) {
-      container.classList.add('hidden');
-      emptyState.classList.remove('hidden');
-      summary.classList.add('hidden');
-      return;
-    }
-
-    emptyState.classList.add('hidden');
-    summary.classList.remove('hidden');
-    container.classList.remove('hidden');
-
-    container.innerHTML = '';
-
-    let subtotal = 0;
-
-    cart.forEach((item, index) => {
-      subtotal += parseInt(item.price) * item.qty;
-
-      const row = document.createElement('div');
-      row.className = 'flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4 shadow-md';
-      row.innerHTML = `
-        <div class="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-          <img src="${item.img}" alt="${item.name}" class="w-full h-full object-contain p-1"/>
-        </div>
-        <div class="flex-1">
-          <h3 class="text-white font-semibold text-base">${item.name}</h3>
-          <p class="text-gray-400 text-xs mt-0.5">${item.desc}</p>
-          <div class="flex items-center gap-3 mt-3">
-            <button onclick="changeQty(${index}, -1)"
-              class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">−</button>
-            <span class="text-white font-semibold text-sm">${item.qty}</span>
-            <button onclick="changeQty(${index}, 1)"
-              class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">+</button>
-          </div>
-        </div>
-        <div class="text-right flex flex-col items-end gap-2">
-          <span class="text-yellow-400 font-bold text-lg">${formatPrice(parseInt(item.price) * item.qty)}</span>
-          <span class="text-gray-500 text-xs line-through">${formatPrice(item.old)}</span>
-          <button onclick="removeItem(${index})"
-            class="mt-2 text-red-500 hover:text-red-400 text-xs font-semibold transition-all duration-200">
-            Remove
-          </button>
-        </div>
-      `;
-      container.appendChild(row);
-    });
-
-    document.getElementById('subtotal').textContent = formatPrice(subtotal);
-    document.getElementById('total').textContent = formatPrice(subtotal);
-  }
-
-  function changeQty(index, delta) {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    cart[index].qty += delta;
-    if (cart[index].qty <= 0) cart.splice(index, 1);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    renderCart();
-  }
-
-  function removeItem(index) {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    cart.splice(index, 1);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    renderCart();
-  }
-
-  renderCart();
-</script>
 
 {% endblock 'content' %}

@@ -1,0 +1,207 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block 'title' %}Admin — Manage Products{% endblock 'title' %}
+
+{% block 'content' %}
+{% include "include/admin_navbar.html" %}
+
+<div class="min-h-screen bg-gray-950 pt-20 pb-12 px-4">
+
+  <!-- Header -->
+  <div class="max-w-screen-xl mx-auto mb-10 flex items-center justify-between">
+    <div>
+      <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Manage Products</h1>
+      <p class="text-gray-400 mt-1 text-sm tracking-wide">Edit stock levels or remove items from your catalog</p>
+      <div class="mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
+    </div>
+    <div class="text-right text-sm text-gray-500">
+      <span class="text-yellow-400 font-bold text-lg">{{ products|length }}</span> products listed
+    </div>
+  </div>
+
+  <!-- Flash Messages -->
+  {% if messages %}
+  <div class="max-w-screen-xl mx-auto mb-6">
+    {% for message in messages %}
+      <div class="mb-2 px-5 py-3 rounded-xl font-semibold text-sm
+        {% if message.tags == 'success' %}bg-green-500/20 text-green-300 border border-green-500/30
+        {% elif message.tags == 'error' %}bg-red-500/20 text-red-300 border border-red-500/30
+        {% else %}bg-yellow-400/10 text-yellow-300 border border-yellow-400/20{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Product Grid -->
+  <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    {% for product in products %}
+    <div class="bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-yellow-400/10 hover:shadow-xl hover:border-yellow-400/30">
+
+      <!-- Product Image -->
+      <div class="relative h-52 bg-gray-100 overflow-hidden">
+        {% if product.product_image %}
+          <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+               class="w-full h-full object-contain p-3"/>
+        {% else %}
+          <div class="w-full h-full flex items-center justify-center text-gray-400 text-4xl">👟</div>
+        {% endif %}
+
+        <!-- Quantity badge -->
+        <div class="absolute top-3 right-3">
+          {% if product.product_quantity == 0 %}
+            <span class="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">Out of Stock</span>
+          {% elif product.product_quantity <= 5 %}
+            <span class="bg-orange-400 text-black text-xs font-bold px-2.5 py-1 rounded-full">Low: {{ product.product_quantity }}</span>
+          {% else %}
+            <span class="bg-green-500/80 text-white text-xs font-bold px-2.5 py-1 rounded-full">Stock: {{ product.product_quantity }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="p-4">
+        <h2 class="text-white font-semibold text-base tracking-wide truncate">{{ product.product_name }}</h2>
+        <p class="text-gray-400 text-xs mt-0.5">{{ product.product_brand }}</p>
+        <p class="text-yellow-400 font-bold text-lg mt-2">₱{{ product.product_price|floatformat:"0" }}</p>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2 mt-4">
+
+          <!-- Edit Stock Button -->
+          <button
+            onclick="openEditModal({{ product.product_id }}, '{{ product.product_name|escapejs }}', {{ product.product_quantity }})"
+            class="flex-1 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-2 px-3 rounded-xl text-xs tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z"/>
+            </svg>
+            Edit Stock
+          </button>
+
+          <!-- Delete Button -->
+          <button
+            onclick="openDeleteModal({{ product.product_id }}, '{{ product.product_name|escapejs }}')"
+            class="bg-gray-800 hover:bg-red-500/20 hover:border-red-500/50 border border-gray-700 text-gray-400 hover:text-red-400 font-bold py-2 px-3 rounded-xl text-xs tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+            </svg>
+            Delete
+          </button>
+
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-span-4 text-center py-24 text-gray-600">
+      <p class="text-5xl mb-4">📦</p>
+      <p class="text-lg font-semibold">No products found.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+<!-- ===== EDIT STOCK MODAL ===== -->
+<div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeEditModal()"></div>
+  <div class="relative bg-gray-900 border border-yellow-400/30 rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 z-10">
+
+    <h2 class="text-xl font-bold text-yellow-400 mb-1">Edit Stock</h2>
+    <p id="editProductName" class="text-gray-400 text-sm mb-6 truncate"></p>
+
+    <form method="POST" action="/admin/products/update_stock">
+      {% csrf_token %}
+      <input type="hidden" name="product_id" id="editProductId"/>
+
+      <label class="block text-gray-400 text-xs font-semibold uppercase tracking-widest mb-2">New Quantity</label>
+      <input
+        type="number"
+        name="quantity"
+        id="editQuantityInput"
+        min="0"
+        class="w-full bg-gray-800 border border-gray-700 focus:border-yellow-400 text-white text-lg font-bold rounded-xl px-4 py-3 outline-none transition-colors duration-200 mb-6"
+        required
+      />
+
+      <div class="flex gap-3">
+        <button type="button" onclick="closeEditModal()"
+          class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-3 rounded-xl transition-colors duration-200">
+          Cancel
+        </button>
+        <button type="submit"
+          class="flex-1 bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-xl transition-colors duration-200">
+          Save Changes
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+
+<!-- ===== DELETE CONFIRM MODAL ===== -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
+  <div class="relative bg-gray-900 border border-red-500/30 rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 z-10">
+
+    <div class="text-5xl text-center mb-4">🗑️</div>
+    <h2 class="text-xl font-bold text-red-400 mb-2 text-center">Delete Product?</h2>
+    <p class="text-gray-400 text-sm text-center mb-1">You are about to permanently delete:</p>
+    <p id="deleteProductName" class="text-white font-semibold text-center mb-6 truncate"></p>
+    <p class="text-gray-500 text-xs text-center mb-6">This action cannot be undone.</p>
+
+    <form method="POST" action="/admin/products/delete">
+      {% csrf_token %}
+      <input type="hidden" name="product_id" id="deleteProductId"/>
+
+      <div class="flex gap-3">
+        <button type="button" onclick="closeDeleteModal()"
+          class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-3 rounded-xl transition-colors duration-200">
+          Cancel
+        </button>
+        <button type="submit"
+          class="flex-1 bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition-colors duration-200">
+          Yes, Delete
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+
+<script>
+  function openEditModal(id, name, qty) {
+    document.getElementById('editProductId').value = id;
+    document.getElementById('editProductName').textContent = name;
+    document.getElementById('editQuantityInput').value = qty;
+    const modal = document.getElementById('editModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  function closeEditModal() {
+    const modal = document.getElementById('editModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function openDeleteModal(id, name) {
+    document.getElementById('deleteProductId').value = id;
+    document.getElementById('deleteProductName').textContent = name;
+    const modal = document.getElementById('deleteModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeEditModal(); closeDeleteModal(); }
+  });
+</script>
+
+{% endblock 'content' %}

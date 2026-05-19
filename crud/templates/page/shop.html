@@ -5,48 +5,28 @@
 
 {% block 'content' %}
 {% include "include/navbar.html" %}
+{% include "include/toast.html" %}
 
 <div class="min-h-screen bg-gray-950 pt-20 pb-12 px-4">
 
-  <!-- Header -->
   <div class="max-w-screen-xl mx-auto mb-10 text-center">
     <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Our Collection</h1>
     <p class="text-gray-400 mt-2 text-sm tracking-wide">Step Into Excellence</p>
     <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
   </div>
 
-  <!-- Product Grid -->
   <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
 
-    <!-- Shoe 1 -->
+    {% for shoe in shoes %}
     <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Classic Runner" data-desc="Premium leather sole" data-price="2499" data-old="3200"
-         data-img="{% static 'picture/shop/shoes1.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes1.png' %}" alt="Classic Runner"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Classic Runner</h2>
-        <p class="text-gray-400 text-xs mt-1">Premium leather sole</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱2,499</span>
-          <span class="text-xs text-gray-500 line-through">₱3,200</span>
-        </div>
-      </div>
-    </div>
+         data-name="{{ shoe.name }}"
+         data-desc="{{ shoe.desc }}"
+         data-price="{{ shoe.price }}"
+         data-old="{{ shoe.old }}"
+         data-img="{% static shoe.img %}">
 
-    <!-- Shoe 2 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Urban Elite" data-desc="Breathable mesh upper" data-price="2799" data-old="3500"
-         data-img="{% static 'picture/shop/shoes2.png' %}">
       <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes2.png' %}" alt="Urban Elite"
+        <img src="{% static shoe.img %}" alt="{{ shoe.name }}"
              class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
         <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
           <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
@@ -54,265 +34,110 @@
           </button>
         </div>
       </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Urban Elite</h2>
-        <p class="text-gray-400 text-xs mt-1">Breathable mesh upper</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱2,799</span>
-          <span class="text-xs text-gray-500 line-through">₱3,500</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- Shoe 3 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Street King" data-desc="Rubber grip outsole" data-price="1999" data-old="2800"
-         data-img="{% static 'picture/shop/shoes3.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes3.png' %}" alt="Street King"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
       <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Street King</h2>
-        <p class="text-gray-400 text-xs mt-1">Rubber grip outsole</p>
+        <h2 class="text-white font-semibold text-base tracking-wide">{{ shoe.name }}</h2>
+        <p class="text-gray-400 text-xs mt-1">{{ shoe.desc }}</p>
         <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱1,999</span>
-          <span class="text-xs text-gray-500 line-through">₱2,800</span>
+          <span class="text-yellow-400 font-bold text-lg">&#8369;{{ shoe.price }}</span>
+          <span class="text-xs text-gray-500 line-through">&#8369;{{ shoe.old }}</span>
         </div>
       </div>
-    </div>
 
-    <!-- Shoe 4 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Gold Series" data-desc="Limited edition drop" data-price="3499" data-old="4200"
-         data-img="{% static 'picture/shop/shoes4.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes4.png' %}" alt="Gold Series"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Gold Series</h2>
-        <p class="text-gray-400 text-xs mt-1">Limited edition drop</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱3,499</span>
-          <span class="text-xs text-gray-500 line-through">₱4,200</span>
-        </div>
-      </div>
     </div>
-
-    <!-- Shoe 5 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Night Stepper" data-desc="Reflective detailing" data-price="2299" data-old="3000"
-         data-img="{% static 'picture/shop/shoes5.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes5.png' %}" alt="Night Stepper"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Night Stepper</h2>
-        <p class="text-gray-400 text-xs mt-1">Reflective detailing</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱2,299</span>
-          <span class="text-xs text-gray-500 line-through">₱3,000</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Shoe 6 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Apex Trainer" data-desc="Dual-density cushioning" data-price="2999" data-old="3800"
-         data-img="{% static 'picture/shop/shoes6.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes6.png' %}" alt="Apex Trainer"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Apex Trainer</h2>
-        <p class="text-gray-400 text-xs mt-1">Dual-density cushioning</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱2,999</span>
-          <span class="text-xs text-gray-500 line-through">₱3,800</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Shoe 7 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Phantom Pro" data-desc="Lightweight foam base" data-price="3199" data-old="4000"
-         data-img="{% static 'picture/shop/shoes7.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes7.png' %}" alt="Phantom Pro"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Phantom Pro</h2>
-        <p class="text-gray-400 text-xs mt-1">Lightweight foam base</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱3,199</span>
-          <span class="text-xs text-gray-500 line-through">₱4,000</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Shoe 8 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Velo Boost" data-desc="Speed-engineered sole" data-price="2699" data-old="3400"
-         data-img="{% static 'picture/shop/shoes8.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes8.png' %}" alt="Velo Boost"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Velo Boost</h2>
-        <p class="text-gray-400 text-xs mt-1">Speed-engineered sole</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱2,699</span>
-          <span class="text-xs text-gray-500 line-through">₱3,400</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Shoe 9 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Terra Grip" data-desc="All-terrain outsole" data-price="2899" data-old="3600"
-         data-img="{% static 'picture/shop/shoes9.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes9.png' %}" alt="Terra Grip"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Terra Grip</h2>
-        <p class="text-gray-400 text-xs mt-1">All-terrain outsole</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱2,899</span>
-          <span class="text-xs text-gray-500 line-through">₱3,600</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Shoe 10 -->
-    <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-         data-name="Crown Edition" data-desc="Signature collection" data-price="3999" data-old="4800"
-         data-img="{% static 'picture/shop/shoes10.png' %}">
-      <div class="relative overflow-hidden h-56 bg-gray-100">
-        <img src="{% static 'picture/shop/shoes10.png' %}" alt="Crown Edition"
-             class="product-img w-full h-full object-contain p-3 transition-transform duration-500"/>
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
-      <div class="p-4">
-        <h2 class="text-white font-semibold text-base tracking-wide">Crown Edition</h2>
-        <p class="text-gray-400 text-xs mt-1">Signature collection</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-yellow-400 font-bold text-lg">₱3,999</span>
-          <span class="text-xs text-gray-500 line-through">₱4,800</span>
-        </div>
-      </div>
-    </div>
+    {% endfor %}
 
   </div>
 </div>
 
-<!-- Toast notification -->
-<div id="toast" class="fixed bottom-6 right-6 bg-yellow-400 text-black font-bold py-3 px-6 rounded-xl shadow-xl opacity-0 transition-opacity duration-500 z-50">
-  ✓ Added to Cart! Redirecting...
-</div>
-
 <script>
-  document.querySelectorAll('.product-card').forEach(card => {
-    const img = card.querySelector('.product-img');
-    const overlay = card.querySelector('.product-overlay');
-    const btn = card.querySelector('.overlay-btn');
+  const CSRF = '{{ csrf_token }}';
 
-    // Hover effects
-    card.addEventListener('mouseenter', () => {
-      img.style.transform = 'scale(1.08)';
-      overlay.style.backgroundColor = 'rgba(250, 204, 21, 0.15)';
-      btn.style.opacity = '1';
-      btn.style.transform = 'translateY(0)';
-      card.style.transform = 'translateY(-6px)';
-      card.style.boxShadow = '0 20px 40px rgba(250, 204, 21, 0.15)';
-      card.style.borderColor = 'rgba(250, 204, 21, 0.4)';
+  function showToast(message, type) {
+    var isSuccess = (type !== 'error');
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.4);font-weight:700;font-size:14px;opacity:0;transform:translateY(16px);transition:all 0.4s ease;';
+    el.style.background = isSuccess ? '#facc15' : '#ef4444';
+    el.style.color      = isSuccess ? '#111827' : '#ffffff';
+
+    var icon = isSuccess
+      ? '<svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>'
+      : '<svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>';
+
+    el.innerHTML = icon + '<span>' + message + '</span>';
+    document.body.appendChild(el);
+
+    requestAnimationFrame(function() {
+      el.style.opacity   = '1';
+      el.style.transform = 'translateY(0)';
     });
 
-    card.addEventListener('mouseleave', () => {
-      img.style.transform = 'scale(1)';
+    setTimeout(function() {
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(16px)';
+      setTimeout(function() { el.remove(); }, 400);
+    }, 3000);
+  }
+
+  document.querySelectorAll('.product-card').forEach(function(card) {
+    var img     = card.querySelector('.product-img');
+    var overlay = card.querySelector('.product-overlay');
+    var btn     = card.querySelector('.overlay-btn');
+
+    card.addEventListener('mouseenter', function() {
+      img.style.transform           = 'scale(1.08)';
+      overlay.style.backgroundColor = 'rgba(250,204,21,0.15)';
+      btn.style.opacity             = '1';
+      btn.style.transform           = 'translateY(0)';
+      card.style.transform          = 'translateY(-6px)';
+      card.style.boxShadow          = '0 20px 40px rgba(250,204,21,0.15)';
+      card.style.borderColor        = 'rgba(250,204,21,0.4)';
+    });
+
+    card.addEventListener('mouseleave', function() {
+      img.style.transform           = 'scale(1)';
       overlay.style.backgroundColor = 'rgba(0,0,0,0)';
-      btn.style.opacity = '0';
-      btn.style.transform = 'translateY(10px)';
-      card.style.transform = 'translateY(0)';
-      card.style.boxShadow = 'none';
-      card.style.borderColor = '';
+      btn.style.opacity             = '0';
+      btn.style.transform           = 'translateY(10px)';
+      card.style.transform          = 'translateY(0)';
+      card.style.boxShadow          = 'none';
+      card.style.borderColor        = '';
     });
 
-    // Add to Cart
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', function(e) {
       e.stopPropagation();
+      btn.disabled    = true;
+      btn.textContent = 'Adding...';
 
-      const item = {
-        name: card.dataset.name,
-        desc: card.dataset.desc,
-        price: card.dataset.price,
-        old: card.dataset.old,
-        img: card.dataset.img,
-        qty: 1
-      };
-
-      // Get existing cart
-      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-      // Check if already in cart — increase qty
-      const existing = cart.find(i => i.name === item.name);
-      if (existing) {
-        existing.qty += 1;
-      } else {
-        cart.push(item);
-      }
-
-      localStorage.setItem('cart', JSON.stringify(cart));
-
-      // Show toast then redirect
-      const toast = document.getElementById('toast');
-      toast.style.opacity = '1';
-      setTimeout(() => { window.location.href = '/page/cart'; }, 1200);
+      fetch('/page/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF,
+        },
+        body: JSON.stringify({
+          name:  card.dataset.name,
+          desc:  card.dataset.desc,
+          price: card.dataset.price,
+          old:   card.dataset.old,
+          img:   card.dataset.img,
+        }),
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          showToast('Added to Cart!', 'success');
+        } else {
+          showToast('Could not add to cart: ' + (data.error || 'unknown error'), 'error');
+        }
+      })
+      .catch(function(err) {
+        showToast('Network error: ' + err, 'error');
+      })
+      .finally(function() {
+        btn.disabled    = false;
+        btn.textContent = 'Add to Cart';
+      });
     });
   });
 </script>
