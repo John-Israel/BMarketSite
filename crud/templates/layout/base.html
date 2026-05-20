@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static '/css/output.css' %}">
     <title>{% block 'title' %}{% endblock 'title' %}</title>
+
+    <!-- ✅ Apply theme BEFORE render to prevent flash -->
+    <script>
+        (function () {
+            const dark = localStorage.getItem('theme') !== 'light';
+            document.documentElement.classList.toggle('dark', dark);
+        })();
+    </script>
 </head>
 <body>
     {% block 'content' %}{% endblock 'content' %}

@@ -9,7 +9,7 @@
 
 <div class="min-h-screen bg-gray-950 pt-20 pb-12 px-4">
 
-  <div class="max-w-screen-xl mx-auto mb-10 text-center">
+  <div class="max-w-screen-xl mx-auto mb-6 text-center">
     <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Our Collection</h1>
     <p class="text-gray-400 mt-2 text-sm tracking-wide">Step Into Excellence</p>
     <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
@@ -21,6 +21,7 @@
           data-product-id="{{ product.product_id }}"
           data-name="{{ product.product_name }}"
           data-brand="{{ product.product_brand }}"
+          data-size="{{ product.product_size.product_size }}"
           data-price="{{ product.price }}"
           data-quantity="{{ product.product_quantity }}"
           data-img="{% if product.product_image %}{{ product.product_image.url }}{% endif %}">
@@ -41,6 +42,9 @@
         <div class="p-4">
           <h2 class="text-white font-semibold text-base tracking-wide">{{ product.product_name }}</h2>
           <p class="text-gray-400 text-xs mt-1">{{ product.product_brand }}</p>
+          <p class="text-gray-400 text-xs mt-1">{{ product.product_size.product_size }}</p>
+
+          
           <div class="flex items-center justify-between mt-3">
             <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.price }}</span>
             <span class="text-xs text-gray-500 line-through">&#8369;{{ product.product_quantity }}</span>
@@ -51,6 +55,14 @@
       {% endfor %}
     </div>
 </div>
+
+<style>
+  .active-tab {
+    background-color: #facc15 !important;
+    color: #000000 !important;
+    border-color: #facc15 !important;
+  }
+</style>
 
 <script>
   const CSRF = '{{ csrf_token }}';
@@ -81,10 +93,32 @@
     }, 3000);
   }
 
+  // ── GENDER FILTER FUNCTIONALITY ──
+  document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-tab', 'bg-yellow-400', 'text-black'));
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-gray-900', 'text-gray-400', 'border-gray-800'));
+      
+      this.classList.add('active-tab');
+      this.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
+
+      var targetGender = this.dataset.gender;
+      document.querySelectorAll('.product-card').forEach(function(card) {
+        if (targetGender === 'all' || card.dataset.category === targetGender) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // ── CARD INTERACTIONS & POST ASYNC ADDITION ──
   document.querySelectorAll('.product-card').forEach(function(card) {
     var img     = card.querySelector('.product-img');
     var overlay = card.querySelector('.product-overlay');
     var btn     = card.querySelector('.overlay-btn');
+    var sizeSel = card.querySelector('.size-select');
 
     card.addEventListener('mouseenter', function() {
       if (img) img.style.transform           = 'scale(1.08)';  // ✅ guard
@@ -123,12 +157,13 @@
           name:  card.dataset.name,
           price: card.dataset.price,
           img:   card.dataset.img,
+          size:  card.dataset.size
         }),
       })
       .then(function(res)  { return res.json(); })
       .then(function(data) {
         if (data.success) {
-          showToast('Added to Cart!', 'success');
+          showToast('Added Size ' + card.dataset.size + ' to Cart!', 'success');
         } else {
           showToast('Could not add to cart: ' + (data.error || 'unknown error'), 'error');
         }
@@ -143,5 +178,4 @@
     });
   });
 </script>
-
 {% endblock 'content' %}

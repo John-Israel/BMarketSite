@@ -33,6 +33,7 @@
 
           <div class="flex-1">
             <h3 class="text-white font-semibold text-base">{{ item.product_name.product_name }}</h3>
+            <p class="text-gray-400 text-xs mt-1">{{ item.product_name.product_size.product_size }}</p>
             <div class="flex items-center gap-3 mt-3">
               <a href="/page/cart/update?cart_id={{ item.cart_id }}&amp;delta=-1"
                  class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">&#8722;</a>

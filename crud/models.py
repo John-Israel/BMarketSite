@@ -46,6 +46,13 @@ class Product_Gender(models.Model):
     product_gender = models.CharField(max_length=128, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+class Product_Size(models.Model):
+    class Meta:
+        db_table = 'product_size_tbl'
+    product_size_id = models.BigAutoField(primary_key=True, blank=True)
+    product_size = models.CharField(max_length=128, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
 class Products(models.Model):
     class Meta:
@@ -55,6 +62,7 @@ class Products(models.Model):
     product_brand = models.CharField(max_length=128, blank=False)
     product_image = models.ImageField(upload_to='product_img/', blank=False, unique=False)
     product_gender = models.ForeignKey(Product_Gender, on_delete=models.CASCADE)
+    product_size = models.ForeignKey(Product_Size, on_delete=models.CASCADE)
     product_price = models.IntegerField(default=0, blank=False)
     product_quantity = models.IntegerField(default=0, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -72,6 +80,7 @@ class History(models.Model):
     class Meta:
         db_table = 'history_tbl'
     history_id =  models.BigAutoField(primary_key=True, blank=True)
+    order_ref = models.CharField(max_length=128, blank=False)
     buyer = models.ForeignKey(Users, on_delete=models.CASCADE)
     product_name = models.ForeignKey(Products, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0, blank=False)
@@ -89,6 +98,7 @@ class Cart(models.Model):
     cart_id =  models.BigAutoField(primary_key=True, blank=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, blank=True)
     product_name = models.ForeignKey(Products, on_delete=models.CASCADE)
+    product_size = models.ForeignKey(Product_Size, on_delete=models.CASCADE, blank=True)
     product_price = models.IntegerField(default=1, blank=False)
     quantity = models.IntegerField(default=0, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)

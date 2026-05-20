@@ -1,0 +1,299 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block 'title' %}Manage Account{% endblock 'title' %}
+
+{% block 'content' %}
+{% include "include/navbar.html" %}
+
+<div class="min-h-screen bg-gray-950 pt-24 pb-16 px-4 transition-colors duration-300" id="manage-page">
+
+  <!-- Background glows -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-24 left-1/4 w-80 h-80 bg-yellow-400 opacity-5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-16 right-1/4 w-72 h-72 bg-yellow-400 opacity-5 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative max-w-3xl mx-auto">
+
+    <!-- Page header -->
+    <div class="mb-10 text-center">
+      <span class="inline-block text-yellow-400 text-xs font-bold tracking-widest uppercase border border-yellow-400 border-opacity-30 rounded-full px-3 py-1 bg-yellow-400 bg-opacity-5 mb-3">
+        Account
+      </span>
+      <h1 class="text-4xl font-black text-white transition-colors duration-300">Manage Account</h1>
+      <p class="text-gray-400 text-sm mt-2">Update your personal information below.</p>
+      <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl shadow-black/40 transition-colors duration-300">
+
+      <form method="POST" action="/page/manage" enctype="multipart/form-data" id="manage-form">
+        {% csrf_token %}
+
+        <!-- Profile picture section INSIDE the form -->
+        <div class="flex flex-col items-center mb-8">
+          <label for="profile_pic" class="cursor-pointer group flex flex-col items-center">
+            <div class="relative">
+              {% if user.profile_pic %}
+                <img src="{{ user.profile_pic.url }}" alt="Profile Picture" id="preview_img"
+                     class="w-28 h-28 rounded-full object-cover border-4 border-yellow-400 border-opacity-60 shadow-lg ring-4 ring-yellow-400 ring-opacity-10"/>
+              {% else %}
+                <img src="{% static 'profile_pics/default_profile_pic.png' %}" alt="Profile" id="preview_img"
+                     class="w-28 h-28 rounded-full object-cover border-4 border-yellow-400 border-opacity-60 shadow-lg ring-4 ring-yellow-400 ring-opacity-10"/>
+              {% endif %}
+              <span class="absolute bottom-1 right-1 bg-yellow-400 text-gray-900 rounded-full p-1.5 shadow-lg group-hover:bg-yellow-300 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536M9 13l6-6m-6 6l-3 1 1-3 6-6"/>
+                </svg>
+              </span>
+            </div>
+            <span class="text-xs text-gray-500 mt-2 group-hover:text-yellow-400 transition-colors duration-200 font-medium">Click to change photo</span>
+          </label>
+          <input type="file" name="profile_pic" id="profile_pic" class="hidden" accept="image/*"/>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+
+          <!-- Full Name -->
+          <div>
+            <label for="full_name" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
+            <input type="text" name="full_name" id="full_name"
+                   value="{{ user.full_name }}"
+                   class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
+                   placeholder="Juan Dela Cruz" required/>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
+            <input type="email" name="email" id="email"
+                   value="{{ user.email }}"
+                   class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
+                   placeholder="juan@example.com"/>
+          </div>
+
+          <!-- Username (read-only) -->
+          <div>
+            <label for="username" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Username</label>
+            <input type="text" id="username"
+                   value="{{ user.username }}"
+                   class="w-full bg-gray-700 border border-gray-700 text-gray-400 text-sm rounded-xl px-4 py-3 outline-none cursor-not-allowed opacity-70"
+                   readonly title="Username cannot be changed"/>
+            <p class="text-xs text-gray-600 mt-1">Username cannot be changed.</p>
+          </div>
+
+          <!-- Gender -->
+          <div>
+            <label for="gender" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Gender</label>
+            <select name="gender" id="gender"
+                    class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200" required>
+              <option value="">Select Gender</option>
+              {% for g in genders %}
+                <option value="{{ g.gender_id }}" {% if g.gender_id == user.gender_id %}selected{% endif %}>
+                  {{ g.gender }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Birth Date -->
+          <div>
+            <label for="birth_date" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Birth Date</label>
+            <input type="date" name="birth_date" id="birth_date"
+                   value="{{ user.birthdate|date:'Y-m-d' }}"
+                   class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200" required/>
+          </div>
+
+          <!-- Contact Number -->
+          <div>
+            <label for="contact_number" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Contact Number</label>
+            <input type="text" name="contact_number" id="contact_number"
+                   value="{{ user.contact_number }}"
+                   class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
+                   placeholder="09XX XXX XXXX"/>
+          </div>
+
+          <!-- New Password -->
+          <div>
+            <label for="new_password" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+              New Password <span class="text-gray-600 normal-case font-normal">(leave blank to keep)</span>
+            </label>
+            <div class="relative">
+              <input type="password" name="new_password" id="new_password"
+                     class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 pr-11 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
+                     placeholder="••••••••"/>
+              <button type="button" onclick="togglePwd('new_password','eye_new')"
+                      class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-yellow-400 transition-colors duration-200">
+                <svg id="eye_new" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Confirm New Password -->
+          <div>
+            <label for="confirm_new_password" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Confirm New Password</label>
+            <div class="relative">
+              <input type="password" name="confirm_new_password" id="confirm_new_password"
+                     class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 pr-11 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
+                     placeholder="••••••••"/>
+              <button type="button" onclick="togglePwd('confirm_new_password','eye_confirm')"
+                      class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-yellow-400 transition-colors duration-200">
+                <svg id="eye_confirm" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>
+                </svg>
+              </button>
+            </div>
+            <p id="pwd_error"   class="hidden mt-1 text-xs text-red-400 font-medium">Passwords do not match.</p>
+            <p id="pwd_success" class="hidden mt-1 text-xs text-green-400 font-medium">Passwords match.</p>
+          </div>
+
+        </div>
+
+        <!-- Address (full width) -->
+        <div class="mt-5">
+          <label for="address" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Address</label>
+          <input type="text" name="address" id="address"
+                 value="{{ user.address }}"
+                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
+                 placeholder="Street, Barangay, City, Province" required/>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 mt-8">
+          <button type="submit" id="save-btn"
+                  class="flex-1 bg-yellow-400 hover:bg-yellow-300 active:scale-95 text-gray-900 font-black text-sm rounded-xl py-3.5 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-yellow-400/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+            Save Changes
+          </button>
+
+          <a href="/page/home"
+             class="flex-1 text-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white font-semibold text-sm rounded-xl py-3.5 transition-all duration-200 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Cancel
+          </a>
+        </div>
+
+      </form>
+
+      <!-- Danger Zone -->
+      <div class="mt-10 pt-8 border-t border-gray-800">
+        <h3 class="text-red-400 font-bold text-sm uppercase tracking-widest mb-1">Danger Zone</h3>
+        <p class="text-gray-500 text-xs mb-4">Deleting your account is permanent and cannot be undone. All your data will be erased.</p>
+        <button onclick="openDeleteModal()"
+                class="flex items-center gap-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-sm font-bold rounded-xl px-5 py-2.5 transition-all duration-200 shadow-md shadow-red-600/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+          </svg>
+          Delete My Account
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm px-4">
+  <div class="bg-gray-900 border border-gray-700 rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-black/60 text-center">
+
+    <div class="w-16 h-16 bg-red-600 bg-opacity-15 border border-red-500 border-opacity-30 rounded-full flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+      </svg>
+    </div>
+
+    <h3 class="text-white font-black text-xl mb-2">Delete Account?</h3>
+    <p class="text-gray-400 text-sm mb-7 leading-relaxed">
+      This action is <span class="text-red-400 font-semibold">irreversible</span>. Your profile, order history, and all account data will be permanently deleted.
+    </p>
+
+    <div class="flex gap-3">
+      <button onclick="closeDeleteModal()"
+              class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-sm rounded-xl py-3 transition-all duration-200">
+        Cancel
+      </button>
+      <form method="POST" action="/page/delete_account" class="flex-1">
+        {% csrf_token %}
+        <button type="submit"
+                class="w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-sm rounded-xl py-3 transition-all duration-200">
+          Yes, Delete
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* Profile picture preview */
+  document.getElementById('profile_pic').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      document.getElementById('preview_img').src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  /* Password match live check */
+  const newPwd     = document.getElementById('new_password');
+  const confPwd    = document.getElementById('confirm_new_password');
+  const pwdError   = document.getElementById('pwd_error');
+  const pwdSuccess = document.getElementById('pwd_success');
+  const saveBtn    = document.getElementById('save-btn');
+
+  function checkPasswords() {
+    if (!newPwd.value && !confPwd.value) {
+      pwdError.classList.add('hidden');
+      pwdSuccess.classList.add('hidden');
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      return;
+    }
+    if (newPwd.value !== confPwd.value) {
+      pwdError.classList.remove('hidden');
+      pwdSuccess.classList.add('hidden');
+      saveBtn.disabled = true;
+      saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      pwdError.classList.add('hidden');
+      pwdSuccess.classList.remove('hidden');
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  }
+  newPwd.addEventListener('input', checkPasswords);
+  confPwd.addEventListener('input', checkPasswords);
+
+  /* Password visibility toggle */
+  function togglePwd(inputId) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  /* Delete modal */
+  function openDeleteModal()  { document.getElementById('delete-modal').classList.remove('hidden'); }
+  function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
+
+  document.getElementById('delete-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeDeleteModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+</script>
+
+{% endblock 'content' %}

@@ -24,6 +24,7 @@
                     <th class="px-6 py-3">Product Image</th>
                     <th class="px-6 py-3">Brand</th>
                     <th class="px-6 py-3">For Genders</th>
+                    <th class="px-6 py-3">Size</th>
                     <th class="px-6 py-3">Price</th>
                     <th class="px-6 py-3">Quantity</th>
                     <th class="px-6 py-3">Action</th>
@@ -54,6 +55,7 @@
                     </td>
                     <td class="px-6 py-3">{{ product.product_brand }}</td>
                     <td class="px-6 py-3">{{ product.product_gender.product_gender }}</td>
+                    <td class="px-6 py-3">{{ product.product_size.product_size }}</td>
                     <td class="px-6 py-3">₱{{ product.product_price|floatformat:2 }}</td>
                     <td class="px-6 py-3">{{ product.product_quantity }}</td>
                     <td class="px-6 py-3">
