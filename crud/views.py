@@ -44,30 +44,18 @@ def get_current_user(request):
 
 
 def home(request):
-    shoes = [
-        {'name': 'Classic Runner',  'desc': 'Premium leather sole',    'price': 2499, 'old': 3200, 'img': 'picture/shop/shoes1.png'},
-        {'name': 'Urban Elite',     'desc': 'Breathable mesh upper',   'price': 2799, 'old': 3500, 'img': 'picture/shop/shoes2.png'},
-        {'name': 'Street King',     'desc': 'Rubber grip outsole',     'price': 1999, 'old': 2800, 'img': 'picture/shop/shoes3.png'},
-        {'name': 'Gold Series',     'desc': 'Limited edition drop',    'price': 3499, 'old': 4200, 'img': 'picture/shop/shoes4.png'},
-        {'name': 'Night Stepper',   'desc': 'Reflective detailing',    'price': 2299, 'old': 3000, 'img': 'picture/shop/shoes5.png'},
-        {'name': 'Apex Trainer',    'desc': 'Dual-density cushioning', 'price': 2999, 'old': 3800, 'img': 'picture/shop/shoes6.png'},
-        {'name': 'Phantom Pro',     'desc': 'Lightweight foam base',   'price': 3199, 'old': 4000, 'img': 'picture/shop/shoes7.png'},
-        {'name': 'Velo Boost',      'desc': 'Speed-engineered sole',   'price': 2699, 'old': 3400, 'img': 'picture/shop/shoes8.png'},
-        {'name': 'Terra Grip',      'desc': 'All-terrain outsole',     'price': 2899, 'old': 3600, 'img': 'picture/shop/shoes9.png'},
-        {'name': 'Crown Edition',   'desc': 'Signature collection',    'price': 3999, 'old': 4800, 'img': 'picture/shop/shoes10.png'},
-    ]
-    for shoe in shoes:
-        shoe['savings']  = shoe['old'] - shoe['price']
-        shoe['discount'] = round((shoe['savings'] / shoe['old']) * 100)
-
-    avg_discount = round(sum(s['discount'] for s in shoes) / len(shoes))
-    best_savings = max(s['savings'] for s in shoes)
-
-    return render(request, 'page/home.html', {
-        'shoes':        shoes,
-        'avg_discount': avg_discount,
-        'best_savings': best_savings,
-    })
+    try:
+        user = get_current_user(request)
+        recent_orders = History.objects.filter(buyer=user)[:3]
+        products = Products.objects.select_related('product_gender', 'product_size')[:4]
+        data = {
+            'products': products,
+            'recent_orders': recent_orders
+        }
+        return render(request, 'page/home.html', data)
+    except Exception as e:
+        return HttpResponse(f"An error occurred during home view: {e}")
+    
 
 def shop(request):
     try:
@@ -84,7 +72,8 @@ def shop(request):
 
 def cart(request):
     try:
-        cart = Cart.objects.select_related('product_name', 'product_size')
+        user = get_current_user(request)
+        cart = Cart.objects.filter(user=user).select_related('product_name', 'product_size')
         subtotal = sum(int(item.product_price if item.product_price else 0) * item.quantity for item in cart)
         data = {
             'cart': cart,
@@ -136,13 +125,16 @@ def cart_update(request):
             cart_item = Cart.objects.get(cart_id=cart_id)
             cart_item.quantity += delta
 
-            if cart_item.quantity <= 0:
-                        cart_item.delete()
+            if cart_item.quantity < 1:
+                cart_item.delete()
+            elif cart_item.quantity > 10:
+                pass  # silently ignore, or return an error message
             else:
+                cart_item.quantity = cart_item.quantity
                 cart_item.save()
 
         except Cart.DoesNotExist:
-            pass
+             pass
 
         # sync session to match DB
     updated_cart = list(
@@ -194,7 +186,11 @@ def payment(request):
                 quantity       = item.quantity,
                 payment_method = payment_method,
                 product_price  = item.product_price,
+                product_total  = subtotal
             )
+        products = Products.objects.get(pk=item.product_name_id)
+        products.product_quantity = max(products.product_quantity - item.quantity, 0)
+        products.save() 
 
         # clear the cart after order is placed
         cart_items.delete()
@@ -226,8 +222,9 @@ def history(request):
         for order in orders_qs:
             key = order.order_ref or order.history_id
             if key not in grouped_orders:
-                grouped_orders[key] = []
-            grouped_orders[key].append(order)
+                grouped_orders[key] = {'items': [], 'total': 0}
+            grouped_orders[key]['items'].append(order)
+            grouped_orders[key]['total'] += order.product_price * order.quantity
 
         subtotal = sum(int(order.product_price if order.product_price else 0) * order.quantity for order in orders_qs)
         
@@ -376,13 +373,30 @@ def delete_account(request):
 # ── Admin ─────────────────────────────────────────────────────────────────────
 
 def admin_home(request):
-    return render(request, 'admin/admin_home.html')
+    try:
+        users = Users.objects.all()
+        products = Products.objects.all()
+        orders = History.objects.all()
+        low_stock = Products.objects.filter(product_quantity__lte=10).select_related('product_gender', 'product_size')
+        data = {
+            'users': users,
+            'products': products,
+            'orders': orders,
+            'low_stock': low_stock
+        }
+        return render(request, 'admin/admin_home.html', data)
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
+    
+
 
 def product_list(request):
     try:
         products = Products.objects.select_related('product_gender')
+        low_stock = Products.objects.filter(product_quantity__lte=10).select_related('product_gender', 'product_size')
         data = {
-            'products': products
+            'products': products,
+            'low_stock': low_stock
         }
         return render(request, 'admin/product_list.html', data)
     except Exception as e:
@@ -465,8 +479,10 @@ def update_product(request, productId):
 def user_list(request):
     try:
         users = Users.objects.select_related('gender')
+        low_stock = Products.objects.filter(product_quantity__lte=10).select_related('product_gender', 'product_size')
         data = {
-            'users': users
+            'users': users,
+            'low_stock': low_stock
         }
         return render(request, 'admin/user_list.html', data)
     except Exception as e:
@@ -517,3 +533,38 @@ def delete_user(request, user_id):
         return redirect('/admin/user_list')
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
+
+
+def admin_history(request):
+    try:
+        user = get_current_user(request)
+        users = Users.objects.get(pk=user.user_id)
+        orders_qs = History.objects.all().select_related('product_name', 'payment_method').order_by('-created_at')
+        
+        grouped_orders = {}
+        for order in orders_qs:
+            key = order.order_ref or order.history_id
+            if key not in grouped_orders:
+                grouped_orders[key] = {'items': [], 'total': 0}
+            grouped_orders[key]['items'].append(order)
+            grouped_orders[key]['total'] += order.product_price * order.quantity
+
+        subtotal = sum(int(order.product_price if order.product_price else 0) * order.quantity for order in orders_qs)
+        
+        data = {
+            'grouped_orders': grouped_orders,
+            'subtotal': subtotal,
+            'user': users
+        }
+        return render(request, 'admin/admin_history.html', data)
+    except Exception as e:
+        return HttpResponse(f"An error occurred during history retrieval: {e}")
+
+def admin_remove_history(request):
+    try:
+        user = get_current_user(request)
+        History.objects.all().delete()
+        messages.success(request, 'Order history cleared successfully.')
+        return redirect('/admin/admin_history')
+    except Exception as e:
+        return HttpResponse(f"An error occurred while clearing history: {e}")

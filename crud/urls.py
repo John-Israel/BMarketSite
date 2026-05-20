@@ -36,4 +36,6 @@ urlpatterns = [
     path('admin/update_product/<int:productId>', views.update_product),
     path('admin/user_list', views.user_list),
     path('admin/delete_user/<int:user_id>', views.delete_user),
+    path('admin/admin_history', views.admin_history),
+    path('admin/admin_history/removeHistory', views.admin_remove_history),
 ]   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

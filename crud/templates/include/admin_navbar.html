@@ -1,6 +1,5 @@
 {% load static %}
 
-<!-- Dark-mode class is toggled on <html> by JS; persist via localStorage -->
 <script>
   (function () {
     const dark = localStorage.getItem('theme') !== 'light';
@@ -78,7 +77,90 @@
           </a>
         </li>
 
-        <!-- ── Settings Dropdown ── -->
+        <!-- Notification Bell -->
+        <li class="relative" id="notif-wrapper">
+          <button onclick="toggleNotif()"
+                  class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
+            <svg class="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+            </svg>
+            <!-- Badge -->
+            {% if low_stock %}
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+              {{ low_stock|length }}
+            </span>
+            {% endif %}
+          </button>
+
+          <!-- Dropdown -->
+          <div id="notif-dropdown"
+              class="hidden absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
+              <p class="text-white font-bold text-sm">Stock Alerts</p>
+              {% if low_stock %}
+              <span class="bg-red-500/10 text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">{{ low_stock|length }} items</span>
+              {% endif %}
+            </div>
+
+            <div class="max-h-72 overflow-y-auto divide-y divide-gray-700">
+              {% for product in low_stock %}
+              <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors duration-150">
+                <div class="w-10 h-10 bg-gray-900 rounded-lg overflow-hidden shrink-0">
+                  {% if product.product_image %}
+                    <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}" class="w-full h-full object-contain p-1">
+                  {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                      <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                      </svg>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-white text-sm font-medium truncate">{{ product.product_name }}</p>
+                  <p class="text-gray-400 text-xs mt-0.5">{{ product.product_brand }}</p>
+                </div>
+                <div class="text-right shrink-0">
+                  {% if product.product_quantity == 0 %}
+                    <span class="bg-red-500/10 text-red-400 text-xs font-bold px-2 py-1 rounded-full">Out of Stock</span>
+                  {% elif product.product_quantity <= 5 %}
+                    <span class="bg-red-500/10 text-red-400 text-xs font-bold px-2 py-1 rounded-full">{{ product.product_quantity }} left</span>
+                  {% else %}
+                    <span class="bg-yellow-500/10 text-yellow-400 text-xs font-bold px-2 py-1 rounded-full">{{ product.product_quantity }} left</span>
+                  {% endif %}
+                </div>
+              </div>
+              {% empty %}
+              <div class="px-4 py-6 text-center">
+                <svg class="w-10 h-10 text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <p class="text-gray-500 text-sm">All products are well stocked!</p>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="px-4 py-3 border-t border-gray-700">
+              <a href="/admin/product_list" class="block text-center text-yellow-400 hover:text-yellow-300 text-xs font-semibold transition-colors duration-200">
+                View All Products →
+              </a>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <a href="/admin/admin_history"
+             class="flex items-center gap-1.5 py-2 px-3 text-gray-200 dark:text-gray-200 light-text-dark rounded
+                    hover:bg-gray-700 md:hover:bg-transparent md:border-0
+                    md:hover:text-yellow-400 md:p-0 transition-colors duration-300">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/>
+            </svg>
+            History
+          </a>
+        </li>
+
+        <!-- Settings Dropdown -->
         <li class="relative" id="settings-menu-wrapper">
           <button id="settings-btn"
                   onclick="toggleSettingsMenu()"
@@ -114,15 +196,13 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="text-white dark:text-white light-text-dark text-sm font-semibold transition-colors duration-300">Dark Mode</p>
-                  <p class="text-gray-400 text-xs" id="theme-label">Currently on</p>
+                  <p class="text-white text-sm font-semibold">Dark Mode</p>
+                  <p class="text-gray-400 text-xs" id="theme-label">Currently off</p>
                 </div>
               </div>
               <!-- Toggle pill -->
-              <div id="dark-toggle-pill"
-                   class="relative w-10 h-5 rounded-full transition-colors duration-300 bg-yellow-400">
-                <div id="dark-toggle-dot"
-                     class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 left-5"></div>
+              <div id="dark-toggle-pill" class="relative w-10 h-5 rounded-full transition-colors duration-300 bg-gray-500">
+                <div id="dark-toggle-dot" class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 left-0.5"></div>
               </div>
             </div>
 
@@ -130,7 +210,6 @@
         </li>
 
       </ul>
-
       <!-- Logout button -->
       <a href="/page/Log_in"
          class="flex items-center gap-2 py-2 px-4 bg-red-600 hover:bg-red-700
@@ -148,7 +227,7 @@
   </div>
 </nav>
 
-<!-- ── Light-mode override styles ── -->
+<!-- Light-mode override styles -->
 <style>
   html:not(.dark) .light-nav          { background-color: #f9fafb !important; }
   html:not(.dark) .light-nav-border   { border-color: #e5e7eb !important; }
@@ -158,7 +237,6 @@
 </style>
 
 <script>
-  /* ── Settings dropdown ── */
   function toggleSettingsMenu() {
     const dd = document.getElementById('settings-dropdown');
     const ch = document.getElementById('settings-chevron');
@@ -175,11 +253,10 @@
     }
   });
 
-  /* ── Dark / Light mode ── */
   function applyTheme(dark) {
     document.documentElement.classList.toggle('dark', dark);
-    document.getElementById('theme-icon-moon').classList.toggle('hidden', !dark);
-    document.getElementById('theme-icon-sun').classList.toggle('hidden', dark);
+    document.getElementById('theme-icon-moon').classList.toggle('hidden', dark);
+    document.getElementById('theme-icon-sun').classList.toggle('hidden', !dark);
     document.getElementById('theme-label').textContent = dark ? 'Currently on' : 'Currently off';
     const pill = document.getElementById('dark-toggle-pill');
     const dot  = document.getElementById('dark-toggle-dot');
@@ -194,7 +271,19 @@
   }
 
   (function () {
-    const dark = localStorage.getItem('theme') !== 'light';
+    const saved = localStorage.getItem('theme');
+    const dark = saved === 'dark';
     applyTheme(dark);
   })();
+  function toggleNotif() {
+    const dd = document.getElementById('notif-dropdown');
+    dd.classList.toggle('hidden');
+  }
+
+  document.addEventListener('click', function (e) {
+    const wrapper = document.getElementById('notif-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      document.getElementById('notif-dropdown').classList.add('hidden');
+    }
+  });
 </script>

@@ -86,6 +86,7 @@ class History(models.Model):
     quantity = models.IntegerField(default=0, blank=False)
     payment_method = models.ForeignKey(Payment, on_delete=models.CASCADE)
     product_price = models.IntegerField(default=1, blank=False)
+    product_total = models.IntegerField(default=1, blank=False)
     # @property
     # def product_price(self):
     #     return self.product.product_price

@@ -8,7 +8,6 @@
 
 <div class="min-h-screen bg-gray-950 pt-24 pb-16 px-4 flex items-center justify-center">
 
-  <!-- Subtle background glow blobs -->
   <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
     <div class="absolute top-20 left-10 w-72 h-72 bg-yellow-400 opacity-5 rounded-full blur-3xl"></div>
     <div class="absolute bottom-20 right-10 w-96 h-96 bg-yellow-400 opacity-5 rounded-full blur-3xl"></div>
@@ -16,158 +15,132 @@
 
   <div class="relative w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
 
-    <!-- ===================== LEFT: Info Panel ===================== -->
-    <div class="space-y-10">
+    <!-- LEFT: Skeleton -->
+    <div id="left-skeleton" class="space-y-4 animate-pulse">
+      <div class="h-6 bg-gray-700 rounded-full w-24"></div>
+      {% for i in "123" %}
+      <div class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl">
+        <div class="w-11 h-11 bg-gray-700 rounded-xl shrink-0"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-3 bg-gray-700 rounded w-16"></div>
+          <div class="h-4 bg-gray-700 rounded w-32"></div>
+        </div>
+        <div class="w-4 h-4 bg-gray-700 rounded"></div>
+      </div>
+      {% endfor %}
+    </div>
 
-      <!-- Heading -->
+    <!-- LEFT: Real Content -->
+    <div id="left-real" class="hidden opacity-0 translate-y-6 transition-all duration-500 space-y-10">
       <div>
         <span class="inline-block text-yellow-400 text-xs font-bold tracking-widest uppercase mb-3 border border-yellow-400 border-opacity-30 rounded-full px-3 py-1 bg-yellow-400 bg-opacity-5">
           Contact Us
         </span>
-       
-        
       </div>
 
-      <!-- Contact Cards -->
       <div class="space-y-4">
-        {% comment %} #so amon icon is halin man sa flowbite {% endcomment %}
         <!-- Facebook -->
         <a href="https://www.facebook.com/shindo.amacan.94" target="_blank"
-           class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl
-                  hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group">
-          
+           class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group">
           <div class="w-11 h-11 bg-gray-800 group-hover:bg-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200">
             <svg class="w-5 h-5 text-yellow-400 group-hover:text-gray-900 transition-colors duration-200"
-                 aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 8 19">
-              <path fill-rule="evenodd"
-                    d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z"
-                    clip-rule="evenodd"/>
+                 xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 8 19">
+              <path fill-rule="evenodd" d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z" clip-rule="evenodd"/>
             </svg>
           </div>
           <div>
             <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Facebook</p>
-            <p class="text-gray-200 text-sm font-medium group-hover:text-yellow-400 transition-colors duration-200">
-              Shindo Amacan
-            </p>
+            <p class="text-gray-200 text-sm font-medium group-hover:text-yellow-400 transition-colors duration-200">Shindo Amacan</p>
           </div>
-          <svg class="w-4 h-4 text-gray-600 group-hover:text-yellow-400 ml-auto transition-colors duration-200"
-               fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-yellow-400 ml-auto transition-colors duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </a>
 
         <!-- Phone -->
         <a href="tel:+639123456789"
-           class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl
-                  hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group">
-          <!-- Flowbite Phone icon -->
+           class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group">
           <div class="w-11 h-11 bg-gray-800 group-hover:bg-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200">
             <svg class="w-5 h-5 text-yellow-400 group-hover:text-gray-900 transition-colors duration-200"
-                 aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 19 18">
+                 xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 19 18">
               <path d="M18 13.446a3.02 3.02 0 0 0-.946-1.985l-1.4-1.4a3.054 3.054 0 0 0-4.218 0l-.7.7a.983.983 0 0 1-1.39 0l-2.1-2.1a.983.983 0 0 1 0-1.389l.7-.7a2.98 2.98 0 0 0 0-4.217l-1.4-1.4a2.824 2.824 0 0 0-4.218 0c-3.619 3.619-3 8.229 1.752 12.979C6.785 17.658 10.151 19 13.1 19c1.41 0 2.66-.512 3.463-1.315a2.824 2.824 0 0 0 .437-4.239Z"/>
             </svg>
           </div>
           <div>
             <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Phone</p>
-            <p class="text-gray-200 text-sm font-medium group-hover:text-yellow-400 transition-colors duration-200">
-              #09941319968
-            </p>
+            <p class="text-gray-200 text-sm font-medium group-hover:text-yellow-400 transition-colors duration-200">#09941319968</p>
           </div>
-          <svg class="w-4 h-4 text-gray-600 group-hover:text-yellow-400 ml-auto transition-colors duration-200"
-               fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-yellow-400 ml-auto transition-colors duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </a>
 
-        <!-- Gmail / Email -->
+        <!-- Gmail -->
         <a href="https://mail.google.com/mail/u/0/#inbox"
-           class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl
-                  hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group">
-          
+           class="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-2xl hover:border-yellow-400 hover:bg-gray-800 transition-all duration-200 group">
           <div class="w-11 h-11 bg-gray-800 group-hover:bg-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200">
             <svg class="w-5 h-5 text-yellow-400 group-hover:text-gray-900 transition-colors duration-200"
-                 aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
+                 xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
               <path d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"/>
               <path d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"/>
             </svg>
           </div>
           <div>
             <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Gmail</p>
-            <p class="text-gray-200 text-sm font-medium group-hover:text-yellow-400 transition-colors duration-200">
-             Bajada Amacan Shindo
-            </p>
+            <p class="text-gray-200 text-sm font-medium group-hover:text-yellow-400 transition-colors duration-200">Bajada Amacan Shindo</p>
           </div>
-          <svg class="w-4 h-4 text-gray-600 group-hover:text-yellow-400 ml-auto transition-colors duration-200"
-               fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-yellow-400 ml-auto transition-colors duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </a>
-
       </div>
     </div>
 
-    <!-- ===================== RIGHT: Contact Form ===================== -->
-    <div class="bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl shadow-black/40">
+    <!-- RIGHT: Skeleton -->
+    <div id="right-skeleton" class="bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl animate-pulse space-y-5">
+      <div class="h-6 bg-gray-700 rounded w-1/2"></div>
+      {% for i in "1234" %}
+      <div class="space-y-2">
+        <div class="h-3 bg-gray-700 rounded w-20"></div>
+        <div class="h-10 bg-gray-700 rounded-xl w-full"></div>
+      </div>
+      {% endfor %}
+      <div class="h-12 bg-gray-700 rounded-xl w-full"></div>
+    </div>
 
+    <!-- RIGHT: Real Content -->
+    <div id="right-real" class="hidden opacity-0 translate-y-6 transition-all duration-500 bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl shadow-black/40">
       <h2 class="text-xl font-bold text-white mb-1">Send a Message</h2>
-      
+
       <form method="POST" action="#" class="space-y-5">
         {% csrf_token %}
 
-        <!-- Name -->
         <div>
-          <label for="name" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Full Name
-          </label>
+          <label for="name" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Full Name</label>
           <input type="text" id="name" name="name" placeholder="Israel Sogello"
-                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl
-                        px-4 py-3 placeholder-gray-600 outline-none
-                        focus:border-yellow-400 hover:border-gray-600
-                        transition-colors duration-200">
+                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200">
         </div>
 
-        <!-- Email -->
         <div>
-          <label for="email" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Email Address
-          </label>
+          <label for="email" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
           <input type="email" id="email" name="email" placeholder="israel@email.com"
-                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl
-                        px-4 py-3 placeholder-gray-600 outline-none
-                        focus:border-yellow-400 hover:border-gray-600
-                        transition-colors duration-200">
+                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200">
         </div>
 
-        <!-- Subject -->
         <div>
-          <label for="subject" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Subject
-          </label>
+          <label for="subject" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Subject</label>
           <input type="text" id="subject" name="subject" placeholder="You have a problem? send a message"
-                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl
-                        px-4 py-3 placeholder-gray-600 outline-none
-                        focus:border-yellow-400 hover:border-gray-600
-                        transition-colors duration-200">
+                 class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200">
         </div>
 
-        <!-- Message -->
         <div>
-          <label for="message" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Message
-          </label>
+          <label for="message" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Message</label>
           <textarea id="message" name="message" rows="4" placeholder="Write your message here..."
-                    class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl
-                           px-4 py-3 placeholder-gray-600 outline-none resize-none
-                           focus:border-yellow-400 hover:border-gray-600
-                           transition-colors duration-200"></textarea>
+                    class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none resize-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"></textarea>
         </div>
 
-        <!-- Submit -->
         <button type="submit"
-                class="w-full bg-yellow-400 hover:bg-yellow-300 active:scale-95
-                       text-gray-900 font-bold text-sm rounded-xl py-3
-                       transition-all duration-200 shadow-lg shadow-yellow-400/20
-                       hover:shadow-yellow-400/40 flex items-center justify-center gap-2">
+                class="w-full bg-yellow-400 hover:bg-yellow-300 active:scale-95 text-gray-900 font-bold text-sm rounded-xl py-3 transition-all duration-200 shadow-lg shadow-yellow-400/20 hover:shadow-yellow-400/40 flex items-center justify-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>
           </svg>
@@ -179,5 +152,30 @@
 
   </div>
 </div>
+
+<script>
+  setTimeout(function () {
+    // Hide skeletons
+    document.getElementById('left-skeleton').style.display = 'none';
+    document.getElementById('right-skeleton').style.display = 'none';
+
+    // Reveal left
+    const leftReal = document.getElementById('left-real');
+    leftReal.classList.remove('hidden');
+    setTimeout(function () {
+      leftReal.classList.remove('opacity-0', 'translate-y-6');
+    }, 50);
+
+    // Reveal right slightly after
+    setTimeout(function () {
+      const rightReal = document.getElementById('right-real');
+      rightReal.classList.remove('hidden');
+      setTimeout(function () {
+        rightReal.classList.remove('opacity-0', 'translate-y-6');
+      }, 50);
+    }, 150);
+
+  }, 600);
+</script>
 
 {% endblock 'content' %}

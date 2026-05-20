@@ -1,1 +1,25 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+body { background-color: #ffffff; color: #111827; }
+.dark body { background-color: #030712; color: #ffffff; }
+
+body .bg-gray-950 { background-color: #f9fafb !important; }
+body .bg-gray-900 { background-color: #f3f4f6 !important; }
+body .bg-gray-800 { background-color: #e5e7eb !important; }
+body .bg-gray-700 { background-color: #d1d5db !important; }
+body .text-white  { color: #111827 !important; }
+body .text-gray-400 { color: #6b7280 !important; }
+body .text-gray-500 { color: #9ca3af !important; }
+body .border-gray-800 { border-color: #e5e7eb !important; }
+body .border-gray-700 { border-color: #d1d5db !important; }
+
+.dark .bg-gray-950 { background-color: #030712 !important; }
+.dark .bg-gray-900 { background-color: #111827 !important; }
+.dark .bg-gray-800 { background-color: #1f2937 !important; }
+.dark .bg-gray-700 { background-color: #374151 !important; }
+.dark .text-white  { color: #ffffff !important; }
+.dark .text-gray-400 { color: #9ca3af !important; }
+.dark .text-gray-500 { color: #6b7280 !important; }
+.dark .border-gray-800 { border-color: #1f2937 !important; }
+.dark .border-gray-700 { border-color: #374151 !important; }

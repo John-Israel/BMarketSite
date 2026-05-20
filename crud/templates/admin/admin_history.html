@@ -4,7 +4,7 @@
 {% block 'title' %}Order History{% endblock 'title' %}
 
 {% block 'content' %}
-{% include "include/navbar.html" %}
+{% include "include/admin_navbar.html" %}
 {% include "include/toast.html" %}
 
 <div class="min-h-screen bg-gray-950 pt-24 pb-16 px-4">
@@ -31,9 +31,9 @@
           </div>
         </div>
 
-        <a href="/page/history/removeHistory" id="clearHistoryBtn"
+        <a href="/admin/admin_history/removeHistory" id="clearHistoryBtn"
           class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded transition-all duration-200 self-start w-fit">
-          Clear Order History
+          Clear all history
         </a>
       </div>
 
@@ -78,13 +78,15 @@
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-yellow-400 bg-opacity-10 border border-yellow-400 border-opacity-30 rounded-xl flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z"/>
-                </svg>
-              </div>
-              <div>
-                <p class="text-white font-bold text-sm">Order #{{ forloop.counter }}</p>
+                {% if group.items.0.buyer.profile_pic.url %}
+                    <img src="{{ group.items.0.buyer.profile_pic.url }}" alt="Profile Picture" id="preview_img"
+                        class="w-10 h-10 bg-yellow-400 bg-opacity-10 border border-yellow-400 border-opacity-30 rounded-xl flex items-center justify-center shrink-0"/>
+                {% else %}
+                    <img src="{% static 'images/upload-icon.png' %}" alt="Upload" id="preview_img"
+                        class="w-10 h-10 bg-yellow-400 bg-opacity-10 border border-yellow-400 border-opacity-30 rounded-xl flex items-center justify-center shrink-0"/>
+                {% endif %}
+            <div>
+                <p class="text-white font-bold text-sm">Order #{{ forloop.counter }} By: {{ group.items.0.buyer.full_name }}</p>
                 <p class="text-gray-500 text-xs mt-0.5">{{ group.items.0.created_at|date:"M d, Y" }}</p>
               </div>
             </div>

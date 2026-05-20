@@ -7,53 +7,98 @@
 {% include "include/navbar.html" %}
 {% include "include/toast.html" %}
 
-<div class="min-h-screen bg-gray-950 pt-20 pb-12 px-4">
+<div class="min-h-screen bg-white-950 bg-gray-950 pt-20 pb-12 px-4">
 
   <div class="max-w-screen-xl mx-auto mb-6 text-center">
     <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Our Collection</h1>
     <p class="text-gray-400 mt-2 text-sm tracking-wide">Step Into Excellence</p>
     <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
   </div>
-    <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
 
-      {% for product in products %}
-      <div class="product-card bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer transition-all duration-300"
-          data-product-id="{{ product.product_id }}"
-          data-name="{{ product.product_name }}"
-          data-brand="{{ product.product_brand }}"
-          data-size="{{ product.product_size.product_size }}"
-          data-price="{{ product.price }}"
-          data-quantity="{{ product.product_quantity }}"
-          data-img="{% if product.product_image %}{{ product.product_image.url }}{% endif %}">
+  <!-- Search Bar -->
+  <div class="max-w-screen-xl mx-auto mb-8 flex justify-center">
+    <div class="relative w-full max-w-md">
+      <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input type="text" id="search" name="search" placeholder="Search by name or brand..."
+        class="w-full bg-gray-900 border border-gray-700 text-white text-sm rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 placeholder-gray-500 transition-all duration-200">
+    </div>
+  </div>
 
-        <div class="relative overflow-hidden h-56 bg-gray-100">
-          {% if product.product_image %}
-            <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}" class="product-img w-full h-full object-contain p-3 transition-transform duration-500">
-          {% else %}
-            <span class="text-gray-400">No Image</span>
-          {% endif %}
-          <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300">
-            <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-              Add to Cart
-            </button>
-          </div>
+  <!-- Product Grid -->
+  <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" id="product-grid">
+
+    {% for product in products %}
+    <div class="product-card opacity-0 translate-y-6 transition-all duration-500 bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer"
+        data-product-id="{{ product.product_id }}"
+        data-name="{{ product.product_name }}"
+        data-brand="{{ product.product_brand }}"
+        data-size="{{ product.product_size.product_size }}"
+        data-price="{{ product.price }}"
+        data-quantity="{{ product.product_quantity }}"
+        data-img="{% if product.product_image %}{{ product.product_image.url }}{% endif %}">
+
+      <!-- Skeleton overlay (shown while image loads) -->
+
+           <div class="relative overflow-hidden h-56 bg-gray-800">
+
+  <!-- Skeleton -->
+      <div class="card-skeleton absolute inset-0 bg-gray-800 animate-pulse z-10"></div>
+
+      {% if product.product_image %}
+        <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+            class="product-img w-full h-full object-contain p-3 transition-all duration-500 opacity-0 relative z-20"
+            onload="
+              this.classList.remove('opacity-0');
+              this.classList.add('opacity-100');
+              this.closest('.relative').querySelector('.card-skeleton').style.display='none';
+            ">
+      {% else %}
+        <div class="w-full h-full flex items-center justify-center relative z-20">
+          <span class="text-gray-400 text-xs">No Image</span>
         </div>
+      {% endif %}
 
-        <div class="p-4">
-          <h2 class="text-white font-semibold text-base tracking-wide">{{ product.product_name }}</h2>
-          <p class="text-gray-400 text-xs mt-1">{{ product.product_brand }}</p>
-          <p class="text-gray-400 text-xs mt-1">{{ product.product_size.product_size }}</p>
-
-          
-          <div class="flex items-center justify-between mt-3">
-            <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.price }}</span>
-            <span class="text-xs text-gray-500 line-through">&#8369;{{ product.product_quantity }}</span>
-          </div>
-        </div>
+      <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300 z-30">
+        <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
+          Add to Cart
+        </button>
+      </div>
 
       </div>
-      {% endfor %}
+
+      <div class="p-4">
+        <h2 class="text-white font-semibold text-base tracking-wide">{{ product.product_name }}</h2>
+        <p class="text-gray-400 text-xs mt-1">{{ product.product_brand }}</p>
+        <p class="text-gray-400 text-xs mt-1">{{ product.product_size.product_size }}</p>
+        <div class="flex items-center justify-between mt-3">
+          <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.product_price }}</span>
+          <span class="text-xs text-gray-500 line-through">&#8369;{{ product.product_quantity }}</span>
+        </div>
+      </div>
+
     </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Scroll loader -->
+  <div id="scroll-loader" class="hidden flex justify-center items-center gap-2 py-10">
+    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0s"></div>
+    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0.15s"></div>
+    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0.3s"></div>
+  </div>
+
+  <!-- No results message -->
+  <div id="no-results" class="hidden text-center py-16">
+    <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+    </svg>
+    <p class="text-gray-500 text-lg font-semibold">No products found</p>
+    <p class="text-gray-600 text-sm mt-1">Try a different search term</p>
+  </div>
+
 </div>
 
 <style>
@@ -62,10 +107,96 @@
     color: #000000 !important;
     border-color: #facc15 !important;
   }
+  .product-card {
+    position: relative;
+    will-change: transform, opacity;
+  }
 </style>
 
 <script>
   const CSRF = '{{ csrf_token }}';
+  const PAGE_SIZE = 8;
+  let currentPage = 1;
+  let isLoading = false;
+  let filteredCards = [];
+
+  const allCards = Array.from(document.querySelectorAll('.product-card'));
+  const scrollLoader = document.getElementById('scroll-loader');
+  const noResults = document.getElementById('no-results');
+
+  // ── LAZY LOAD ON REFRESH (reveal cards one by one) ──
+  function revealCards(cards, startIndex, count) {
+    const end = Math.min(startIndex + count, cards.length);
+    for (let i = startIndex; i < end; i++) {
+      const card = cards[i];
+      card.style.display = 'block';
+      setTimeout(() => {
+        card.classList.remove('opacity-0', 'translate-y-6');
+      }, (i - startIndex) * 80);
+    }
+    currentPage = Math.ceil(end / PAGE_SIZE);
+  }
+
+  function init() {
+    // Hide all cards first
+    allCards.forEach(card => {
+      card.style.display = 'none';
+      card.classList.add('opacity-0', 'translate-y-6');
+    });
+
+    filteredCards = [...allCards];
+
+    // Show skeleton shimmer briefly then reveal first page
+    setTimeout(() => {
+      revealCards(filteredCards, 0, PAGE_SIZE);
+    }, 500);
+  }
+
+  // ── INFINITE SCROLL ──
+  function loadMore() {
+    const totalPages = Math.ceil(filteredCards.length / PAGE_SIZE);
+    if (isLoading || currentPage >= totalPages) return;
+
+    isLoading = true;
+    scrollLoader.classList.remove('hidden');
+
+    setTimeout(() => {
+      const start = currentPage * PAGE_SIZE;
+      revealCards(filteredCards, start, PAGE_SIZE);
+      scrollLoader.classList.add('hidden');
+      isLoading = false;
+    }, 700);
+  }
+
+  window.addEventListener('scroll', () => {
+    const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
+    if (nearBottom) loadMore();
+  });
+
+  // ── SEARCH ──
+  document.getElementById('search').addEventListener('input', function () {
+    const query = this.value.trim().toLowerCase();
+
+    allCards.forEach(card => {
+      card.style.display = 'none';
+      card.classList.add('opacity-0', 'translate-y-6');
+    });
+
+    filteredCards = allCards.filter(card => {
+      const name  = card.dataset.name.toLowerCase();
+      const brand = card.dataset.brand.toLowerCase();
+      return name.includes(query) || brand.includes(query);
+    });
+
+    currentPage = 0;
+
+    if (filteredCards.length === 0) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      revealCards(filteredCards, 0, PAGE_SIZE);
+    }
+  });
 
   function showToast(message, type) {
     var isSuccess = (type !== 'error');
@@ -73,19 +204,15 @@
     el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.4);font-weight:700;font-size:14px;opacity:0;transform:translateY(16px);transition:all 0.4s ease;';
     el.style.background = isSuccess ? '#facc15' : '#ef4444';
     el.style.color      = isSuccess ? '#111827' : '#ffffff';
-
     var icon = isSuccess
       ? '<svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>'
       : '<svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>';
-
     el.innerHTML = icon + '<span>' + message + '</span>';
     document.body.appendChild(el);
-
     requestAnimationFrame(function() {
       el.style.opacity   = '1';
       el.style.transform = 'translateY(0)';
     });
-
     setTimeout(function() {
       el.style.opacity   = '0';
       el.style.transform = 'translateY(16px)';
@@ -93,35 +220,32 @@
     }, 3000);
   }
 
-  // ── GENDER FILTER FUNCTIONALITY ──
   document.querySelectorAll('.filter-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-tab', 'bg-yellow-400', 'text-black'));
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-gray-900', 'text-gray-400', 'border-gray-800'));
-      
       this.classList.add('active-tab');
       this.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
-
       var targetGender = this.dataset.gender;
-      document.querySelectorAll('.product-card').forEach(function(card) {
-        if (targetGender === 'all' || card.dataset.category === targetGender) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
+      allCards.forEach(card => {
+        card.style.display = 'none';
+        card.classList.add('opacity-0', 'translate-y-6');
       });
+      filteredCards = allCards.filter(card =>
+        targetGender === 'all' || card.dataset.category === targetGender
+      );
+      currentPage = 0;
+      revealCards(filteredCards, 0, PAGE_SIZE);
     });
   });
 
-  // ── CARD INTERACTIONS & POST ASYNC ADDITION ──
   document.querySelectorAll('.product-card').forEach(function(card) {
     var img     = card.querySelector('.product-img');
     var overlay = card.querySelector('.product-overlay');
     var btn     = card.querySelector('.overlay-btn');
-    var sizeSel = card.querySelector('.size-select');
 
     card.addEventListener('mouseenter', function() {
-      if (img) img.style.transform           = 'scale(1.08)';  // ✅ guard
+      if (img) img.style.transform  = 'scale(1.08)';
       overlay.style.backgroundColor = 'rgba(250,204,21,0.15)';
       btn.style.opacity             = '1';
       btn.style.transform           = 'translateY(0)';
@@ -131,7 +255,7 @@
     });
 
     card.addEventListener('mouseleave', function() {
-      if (img) img.style.transform           = 'scale(1)';     // ✅ guard
+      if (img) img.style.transform  = 'scale(1)';
       overlay.style.backgroundColor = 'rgba(0,0,0,0)';
       btn.style.opacity             = '0';
       btn.style.transform           = 'translateY(10px)';
@@ -141,12 +265,9 @@
     });
 
     btn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    btn.disabled    = true;
-    btn.textContent = 'Adding...';
-
-    
-
+      e.stopPropagation();
+      btn.disabled    = true;
+      btn.textContent = 'Adding...';
       fetch('/page/cart/add/' + card.dataset.productId + '/', {
         method: 'POST',
         headers: {
@@ -177,5 +298,8 @@
       });
     });
   });
+
+  // ── INIT ──
+  init();
 </script>
 {% endblock 'content' %}

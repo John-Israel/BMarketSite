@@ -6,107 +6,285 @@
 {% block 'content' %}
 {% include "include/navbar.html" %}
 
-<!-- Hero -->
-<div class="min-h-screen bg-cover bg-center bg-no-repeat"
+<!-- Hero Banner -->
+<div class="h-52 bg-cover bg-center bg-no-repeat relative"
      style="background-image: url('{% static 'picture/home/home.png' %}');">
+  <div class="absolute inset-0 bg-black/50"></div>
 </div>
 
-<!-- Dashboard -->
-<div class="bg-gray-950 px-4 py-16">
-  <div class="max-w-screen-xl mx-auto">
+<!-- Page wrapper -->
+<div class="bg-gray-950 min-h-screen px-4 pb-16 relative z-10" style="margin-top: -3rem;">
+  <div class="max-w-screen-xl mx-auto space-y-4">
 
-    <!-- Section Header -->
-    <div class="mb-10 text-center">
-      <h2 class="text-3xl font-bold text-yellow-400 tracking-widest uppercase">Today's Deals</h2>
-      <p class="text-gray-400 mt-2 text-sm tracking-wide">Exclusive discounts just for you</p>
-      <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
+    <!-- Welcome Card -->
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl flex items-center justify-between flex-wrap gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-blue-900/60 flex items-center justify-center text-blue-400 font-medium text-base flex-shrink-0">
+          {{ request.user.username|slice:":2"|upper }}
+        </div>
+        <div>
+          <p class="text-xs text-yellow-400 uppercase tracking-widest font-medium">Welcome back</p>
+          <p class="text-xl font-medium text-white mt-0.5">Hey, {{ request.user.username }}! 👋</p>
+          <p class="text-xs text-gray-400 mt-0.5">Browse our latest deals below.</p>
+        </div>
+      </div>
+      <a href="/page/shop"
+         class="bg-yellow-400 hover:bg-yellow-300 text-gray-900 text-xs font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-95">
+        Shop Now
+      </a>
     </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14">
-
-      <!-- Stat 1 -->
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center gap-4">
-        <div class="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center shrink-0">
-          <!-- Flowbite: tag icon -->
-          <svg class="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M5.024 3.783A1 1 0 0 1 6 3h6a1 1 0 0 1 .707.293l4 4a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414 0l-4-4A1 1 0 0 1 5 10V4a1 1 0 0 1 .024-.217ZM7 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" clip-rule="evenodd"/>
-            <path d="m14.707 14.707-1.414 1.414 4 4a1 1 0 0 0 1.414-1.414l-4-4Z"/>
-          </svg>
+    <!-- Stats Bar -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+          <i class="ti ti-shoe text-blue-400 text-lg"></i>
         </div>
         <div>
-          <p class="text-gray-400 text-xs uppercase tracking-wider">Items on Sale</p>
-          <p class="text-white font-bold text-2xl mt-0.5">10</p>
+          <p class="text-gray-500 text-xs uppercase tracking-wider">Products</p>
+          <p class="text-white text-lg font-medium">{{ products|length }}</p>
         </div>
       </div>
-
-      <!-- Stat 2 -->
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center gap-4">
-        <div class="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center shrink-0">
-          <!-- Flowbite: percent icon -->
-          <svg class="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M3.464 3.464A5 5 0 0 1 9.172 2h5.656a5 5 0 0 1 3.536 1.464l2.172 2.172A5 5 0 0 1 22 9.172v5.656a5 5 0 0 1-1.464 3.536l-2.172 2.172A5 5 0 0 1 14.828 22H9.172a5 5 0 0 1-3.536-1.464L3.464 19.364A5 5 0 0 1 2 15.828V9.172a5 5 0 0 1 1.464-3.536L3.464 3.464Zm3.95 3.95a1 1 0 0 1 1.414 0l8 8a1 1 0 0 1-1.414 1.414l-8-8a1 1 0 0 1 0-1.414ZM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm7 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/>
-          </svg>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
+          <i class="ti ti-shopping-cart text-emerald-400 text-lg"></i>
         </div>
         <div>
-          <p class="text-gray-400 text-xs uppercase tracking-wider">Avg. Discount</p>
-          <p class="text-white font-bold text-2xl mt-0.5">22%</p>
+          <p class="text-gray-500 text-xs uppercase tracking-wider">My Orders</p>
+          <p class="text-white text-lg font-medium">{{ recent_orders|length }}</p>
         </div>
       </div>
-
-      <!-- Stat 3 -->
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-center gap-4">
-        <div class="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center shrink-0">
-          <!-- Flowbite: fire icon -->
-          <svg class="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.597 3.2A1 1 0 0 0 7.04 4.289a3.49 3.49 0 0 1 .057 1.795 3.448 3.448 0 0 1-.84 1.575.999.999 0 0 0-.077.094c-.596.817-.795 1.9-.734 2.998.164 2.977 2.357 6.494 7.602 6.237 3.986-.193 6.952-3.648 6.952-7.577v-.086c0-1.566-1.14-2.62-2.247-3.24a4.03 4.03 0 0 1-1.265-1.076c-.395-.576-.537-1.167-.53-1.735a1 1 0 0 0-1.57-.828c-1.965 1.348-2.583 3.432-2.47 5.226.024.374-.459.54-.684.235a3.494 3.494 0 0 1-.584-2.07 1 1 0 0 0-.855-.838Z"/>
-          </svg>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-yellow-900/40 flex items-center justify-center flex-shrink-0">
+          <i class="ti ti-star text-yellow-400 text-lg"></i>
         </div>
         <div>
-          <p class="text-gray-400 text-xs uppercase tracking-wider">Best Savings</p>
-          <p class="text-white font-bold text-2xl mt-0.5">₱801</p>
+          <p class="text-gray-500 text-xs uppercase tracking-wider">Deals</p>
+          <p class="text-white text-lg font-medium">Today</p>
         </div>
       </div>
-
     </div>
 
-    <!-- Discounted Products Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <!-- Featured Products + Recent Orders -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-      {% for shoe in shoes %}
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-md hover:border-yellow-400 hover:shadow-yellow-400/10 transition-all duration-300 group">
-
-        <!-- Badge -->
-        <div class="relative h-48 bg-gray-100 overflow-hidden">
-          <img src="{% static shoe.img %}" alt="{{ shoe.name }}"
-               class="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"/>
-          <span class="absolute top-3 left-3 bg-yellow-400 text-gray-900 text-xs font-black px-2 py-1 rounded-lg">
-            -{{ shoe.discount }}%
-          </span>
+      <!-- Featured Products -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-sm font-medium text-white">Featured Products</p>
+          <a href="/page/shop" class="text-yellow-400 text-xs font-medium hover:text-yellow-300 transition-colors">View all →</a>
         </div>
-
-        <div class="p-4">
-          <h3 class="text-white font-semibold text-sm tracking-wide">{{ shoe.name }}</h3>
-          <p class="text-gray-500 text-xs mt-0.5">{{ shoe.desc }}</p>
-          <div class="flex items-center justify-between mt-3">
-            <div>
-              <span class="text-yellow-400 font-bold text-base">&#8369;{{ shoe.price }}</span>
-              <span class="text-gray-600 text-xs line-through ml-2">&#8369;{{ shoe.old }}</span>
+        <div class="grid grid-cols-2 gap-3">
+          {% for product in products %}
+          <div class="bg-gray-800 rounded-xl p-3">
+            <div class="w-full h-24 bg-gray-700/50 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
+              {% if product.product_image %}
+                <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+                     class="w-full h-full object-contain p-2">
+              {% else %}
+                <i class="ti ti-shoe text-3xl text-gray-600"></i>
+              {% endif %}
             </div>
-            <span class="text-green-400 text-xs font-semibold">Save &#8369;{{ shoe.savings }}</span>
+            <p class="text-xs font-medium text-white leading-tight">{{ product.product_name }}</p>
+            <p class="text-xs text-gray-500 mt-0.5 mb-1.5">{{ product.product_brand }} · Size {{ product.product_size.product_size }}</p>
+            <p class="text-yellow-400 font-semibold text-sm">&#8369;{{ product.product_price }}</p>
           </div>
-          <a href="/page/shop"
-             class="mt-3 block w-full text-center bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-xs py-2 rounded-xl transition-all duration-200 active:scale-95">
-            Shop Now
-          </a>
+          {% empty %}
+          <p class="text-xs text-gray-500 col-span-2 text-center py-4">No products available.</p>
+          {% endfor %}
         </div>
+      </div>
 
+      <!-- Recent Orders -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-sm font-medium text-white">Recent Orders</p>
+          <a href="/page/history" class="text-yellow-400 text-xs font-medium hover:text-yellow-300 transition-colors">View all →</a>
+        </div>
+        <table class="w-full text-xs border-collapse">
+          <thead>
+            <tr>
+              <th class="text-gray-500 text-left font-medium uppercase tracking-widest text-xs pb-3">Product</th>
+              <th class="text-gray-500 text-left font-medium uppercase tracking-widest text-xs pb-3">Payment</th>
+              <th class="text-gray-500 text-right font-medium uppercase tracking-widest text-xs pb-3">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr class="border-t border-gray-800">
+              <td class="py-3">
+                <p class="font-medium text-white">{{ order.product_name.product_name }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">Qty: {{ order.quantity }}</p>
+              </td>
+              <td class="py-3">
+                {% if order.payment_method.payment_method == 'Cash on Delivery' %}
+                  <span class="bg-blue-900/60 text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-full">COD</span>
+                {% else %}
+                  <span class="bg-emerald-900/60 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full">GCash</span>
+                {% endif %}
+              </td>
+              <td class="py-3 text-right font-medium text-white">
+                &#8369;{{ order.product_total|floatformat:"0" }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-gray-500 py-6">No orders yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="border-t border-gray-800 mt-4 pt-4 text-center">
+          <a href="/page/history" class="text-yellow-400 text-xs font-medium hover:text-yellow-300 transition-colors">View full order history →</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- About Us -->
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-start gap-5 flex-wrap">
+      <div class="w-14 h-14 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0">
+        <i class="ti ti-building-store text-yellow-400 text-2xl"></i>
+      </div>
+      <div class="flex-1 min-w-48">
+        <p class="text-base font-medium text-white mb-1.5">About Us</p>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          We are a passionate team dedicated to bringing you the best footwear at affordable prices.
+          From classic styles to the latest trends, our store is your one-stop shop for quality shoes.
+          We believe everyone deserves to walk in comfort and style.
+        </p>
+        <div class="flex gap-5 mt-4 flex-wrap">
+          <div class="flex items-center gap-1.5 text-xs text-gray-400">
+            <i class="ti ti-truck-delivery text-yellow-400"></i> Fast Delivery
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-gray-400">
+            <i class="ti ti-shield-check text-yellow-400"></i> Secure Payments
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-gray-400">
+            <i class="ti ti-headset text-yellow-400"></i> 24/7 Support
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Deals Header -->
+    <div class="text-center pt-4">
+      <h2 class="text-2xl font-bold text-yellow-400 tracking-widest uppercase">Today's Deals</h2>
+      <p class="text-gray-500 mt-1.5 text-xs tracking-wide">Exclusive discounts just for you</p>
+      <div class="mx-auto mt-3 w-16 h-0.5 bg-yellow-400 rounded-full"></div>
+    </div>
+
+    <!-- Today's Deals Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="product-grid">
+      {% for product in products %}
+      <div class="product-card opacity-0 translate-y-4 transition-all duration-500 bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-md hover:border-yellow-400/50 hover:shadow-yellow-400/5 group"
+           style="display: none;">
+        <div class="relative h-44 bg-gray-800 overflow-hidden">
+          <div class="card-skeleton absolute inset-0 bg-gray-800 animate-pulse z-10"></div>
+          <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+               class="product-img w-full h-full object-contain p-4 transition-all duration-500 opacity-0 relative z-20 group-hover:scale-105"
+               onload="revealCard(this)">
+        </div>
+        <div class="p-4">
+          <!-- Skeleton -->
+          <div class="text-skeleton space-y-2">
+            <div class="h-3.5 bg-gray-700 rounded animate-pulse w-3/4"></div>
+            <div class="h-3 bg-gray-700 rounded animate-pulse w-1/2"></div>
+            <div class="h-3 bg-gray-700 rounded animate-pulse w-1/3"></div>
+            <div class="flex justify-between mt-3">
+              <div class="h-5 bg-gray-700 rounded animate-pulse w-1/4"></div>
+            </div>
+            <div class="h-8 bg-gray-700 rounded-xl animate-pulse w-full mt-2"></div>
+          </div>
+          <!-- Content -->
+          <div class="text-content hidden">
+            <h3 class="text-white font-semibold text-sm tracking-wide">{{ product.product_name }}</h3>
+            <p class="text-gray-500 text-xs mt-0.5">Brand: {{ product.product_brand }}</p>
+            <p class="text-gray-500 text-xs mt-0.5">Size: {{ product.product_size.product_size }}</p>
+            <div class="flex items-center justify-between mt-3">
+              <span class="text-yellow-400 font-bold text-base">&#8369;{{ product.product_price }}</span>
+            </div>
+            <a href="/page/shop"
+               class="mt-3 block w-full text-center bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-xs py-2 rounded-xl transition-all duration-200 active:scale-95">
+              Shop Now
+            </a>
+          </div>
+        </div>
       </div>
       {% endfor %}
+    </div>
 
+    <!-- Scroll Loader -->
+    <div id="scroll-loader" class="hidden flex justify-center items-center gap-2 py-10">
+      <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0s"></div>
+      <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0.15s"></div>
+      <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0.3s"></div>
     </div>
 
   </div>
 </div>
+
+<script>
+  const PAGE_SIZE = 8;
+  let currentPage = 0;
+  let isLoading = false;
+
+  const allCards = Array.from(document.querySelectorAll('.product-card'));
+  const scrollLoader = document.getElementById('scroll-loader');
+
+  function revealCard(img) {
+    img.classList.remove('opacity-0');
+    img.classList.add('opacity-100');
+
+    const card = img.closest('.product-card');
+    const skeleton = img.closest('.relative').querySelector('.card-skeleton');
+    const textSkeleton = card.querySelector('.text-skeleton');
+    const textContent = card.querySelector('.text-content');
+
+    if (skeleton) skeleton.style.display = 'none';
+    if (textSkeleton) textSkeleton.style.display = 'none';
+    if (textContent) textContent.classList.remove('hidden');
+  }
+
+  function revealCards(startIndex, count) {
+    const end = Math.min(startIndex + count, allCards.length);
+    for (let i = startIndex; i < end; i++) {
+      const card = allCards[i];
+      card.style.display = 'block';
+      setTimeout(() => {
+        card.classList.remove('opacity-0', 'translate-y-4');
+      }, (i - startIndex) * 80);
+    }
+    currentPage = Math.ceil(end / PAGE_SIZE);
+  }
+
+  function loadMore() {
+    const totalPages = Math.ceil(allCards.length / PAGE_SIZE);
+    if (isLoading || currentPage >= totalPages) return;
+
+    isLoading = true;
+    scrollLoader.classList.remove('hidden');
+
+    setTimeout(() => {
+      const start = currentPage * PAGE_SIZE;
+      revealCards(start, PAGE_SIZE);
+      scrollLoader.classList.add('hidden');
+      isLoading = false;
+    }, 700);
+  }
+
+  window.addEventListener('scroll', () => {
+    const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+    if (nearBottom) loadMore();
+  });
+
+  document.querySelectorAll('.product-img').forEach(function(img) {
+    if (img.complete) revealCard(img);
+  });
+
+  setTimeout(() => {
+    revealCards(0, PAGE_SIZE);
+  }, 300);
+</script>
 
 {% endblock 'content' %}
