@@ -37,6 +37,16 @@
                             placeholder="0.00" />
                     </div>
                     <div>
+                        <label for="product_size" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Size</label>
+                        <select name="product_size" id="product_size" required
+                            class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="">Select Size</option>
+                            {% for product_size in product_sizes %}
+                                <option value="{{ product_size.product_size_id }}" {% if product_size.product_size_id == product.product_size.product_size_id %}selected{% endif %} >{{ product_size.product_size }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
                         <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Quantity</label>
                         <input type="number" name="quantity" id="quantity" value="{{ product.product_quantity }}" required
                             class="bg-white dark:bg-gray-800 px-3 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
