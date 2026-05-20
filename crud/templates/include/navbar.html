@@ -135,7 +135,7 @@
           <div id="settings-dropdown"
                class="hidden absolute right-0 mt-2 w-56 bg-gray-800 dark:bg-gray-800 light-dropdown border border-gray-700 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden z-50 transition-colors duration-300">
 
-            <!-- Dark Mode Toggle -->
+            <!--Shindo Mode Toggle -->
             <div class="flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition-colors duration-150 cursor-pointer"
                  onclick="toggleDarkMode()">
               <div class="flex items-center gap-3">
@@ -200,7 +200,7 @@
   </div>
 </nav>
 
-<!-- ── Light-mode override styles (Tailwind-compatible inline) ── -->
+<!-- ── Gasiga-mode  ── -->
 <style>
   /* Light mode overrides triggered by absence of .dark on <html> */
   html:not(.dark) .light-nav          { background-color: #f9fafb !important; }
@@ -229,15 +229,15 @@
     }
   });
 
-  /* ── Dark / Light mode ── */
+  /* ── Shindo / Maliwanag mode ── */
   function applyTheme(dark) {
     document.documentElement.classList.toggle('dark', dark);
-    // icons
+    
     document.getElementById('theme-icon-moon').classList.toggle('hidden', !dark);
     document.getElementById('theme-icon-sun').classList.toggle('hidden', dark);
-    // label
+    
     document.getElementById('theme-label').textContent = dark ? 'Currently on' : 'Currently off';
-    // pill
+    
     const pill = document.getElementById('dark-toggle-pill');
     const dot  = document.getElementById('dark-toggle-dot');
     pill.style.backgroundColor = dark ? '#facc15' : '#6b7280';

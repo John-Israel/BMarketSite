@@ -46,11 +46,13 @@ def get_current_user(request):
 def home(request):
     try:
         user = get_current_user(request)
+        users = Users.objects.get(pk=user.user_id)
         recent_orders = History.objects.filter(buyer=user)[:3]
         products = Products.objects.select_related('product_gender', 'product_size')[:4]
         data = {
             'products': products,
-            'recent_orders': recent_orders
+            'recent_orders': recent_orders,
+            'user': users
         }
         return render(request, 'page/home.html', data)
     except Exception as e:
@@ -459,18 +461,21 @@ def update_product(request, productId):
             product = Products.objects.get(pk=productId)
             product.product_price = request.POST.get('price')
             product.product_quantity = request.POST.get('quantity')
+            product.product_size = Product_Size.objects.get(pk=request.POST.get('product_size'))
             product.save()
             messages.success(request,'Product updated succesfully! ')
 
             data = {
-                'product': product
+                'product': product,
             }
             return redirect('/admin/product_list')
         else:
             product = Products.objects.get(pk=productId)
+            product_size = Product_Size.objects.all()
 
             data = {
-                'product': product
+                'product': product,
+                'product_sizes': product_size
             }
             return render(request, 'admin/update_product.html', data)
     except Exception as e:

@@ -7,7 +7,7 @@
 {% include "include/navbar.html" %}
 {% include "include/toast.html" %}
 
-<div class="min-h-screen bg-white-950 bg-gray-950 pt-20 pb-12 px-4">
+<div class="min-h-screen bg-gray-950 pt-20 pb-12 px-4">
 
   <div class="max-w-screen-xl mx-auto mb-6 text-center">
     <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Our Collection</h1>
@@ -16,7 +16,7 @@
   </div>
 
   <!-- Search Bar -->
-  <div class="max-w-screen-xl mx-auto mb-8 flex justify-center">
+  <div class="max-w-screen-xl mx-auto mb-5 flex justify-center">
     <div class="relative w-full max-w-md">
       <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
@@ -24,6 +24,22 @@
       <input type="text" id="search" name="search" placeholder="Search by name or brand..."
         class="w-full bg-gray-900 border border-gray-700 text-white text-sm rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 placeholder-gray-500 transition-all duration-200">
     </div>
+  </div>
+
+  <!-- Gender Filter Tabs -->
+  <div class="max-w-screen-xl mx-auto mb-8 flex justify-center gap-3">
+    <button class="filter-btn active-tab text-xs font-semibold px-5 py-2 rounded-xl border transition-all duration-200 bg-yellow-400 text-black border-yellow-400"
+            data-gender="all">
+      All
+    </button>
+    <button class="filter-btn text-xs font-semibold px-5 py-2 rounded-xl border transition-all duration-200 bg-gray-900 text-gray-400 border-gray-800"
+            data-gender="male">
+      Men
+    </button>
+    <button class="filter-btn text-xs font-semibold px-5 py-2 rounded-xl border transition-all duration-200 bg-gray-900 text-gray-400 border-gray-800"
+            data-gender="female">
+      Women
+    </button>
   </div>
 
   <!-- Product Grid -->
@@ -35,36 +51,35 @@
         data-name="{{ product.product_name }}"
         data-brand="{{ product.product_brand }}"
         data-size="{{ product.product_size.product_size }}"
-        data-price="{{ product.price }}"
+        data-price="{{ product.product_price }}"
         data-quantity="{{ product.product_quantity }}"
+        data-gender="{{ product.product_gender.product_gender|lower }}"
         data-img="{% if product.product_image %}{{ product.product_image.url }}{% endif %}">
 
-      <!-- Skeleton overlay (shown while image loads) -->
+      <div class="relative overflow-hidden h-56 bg-gray-800">
 
-           <div class="relative overflow-hidden h-56 bg-gray-800">
+        <!-- Skeleton -->
+        <div class="card-skeleton absolute inset-0 bg-gray-800 animate-pulse z-10"></div>
 
-  <!-- Skeleton -->
-      <div class="card-skeleton absolute inset-0 bg-gray-800 animate-pulse z-10"></div>
+        {% if product.product_image %}
+          <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+              class="product-img w-full h-full object-contain p-3 transition-all duration-500 opacity-0 relative z-20"
+              onload="
+                this.classList.remove('opacity-0');
+                this.classList.add('opacity-100');
+                this.closest('.relative').querySelector('.card-skeleton').style.display='none';
+              ">
+        {% else %}
+          <div class="w-full h-full flex items-center justify-center relative z-20">
+            <span class="text-gray-400 text-xs">No Image</span>
+          </div>
+        {% endif %}
 
-      {% if product.product_image %}
-        <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
-            class="product-img w-full h-full object-contain p-3 transition-all duration-500 opacity-0 relative z-20"
-            onload="
-              this.classList.remove('opacity-0');
-              this.classList.add('opacity-100');
-              this.closest('.relative').querySelector('.card-skeleton').style.display='none';
-            ">
-      {% else %}
-        <div class="w-full h-full flex items-center justify-center relative z-20">
-          <span class="text-gray-400 text-xs">No Image</span>
+        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300 z-30">
+          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
+            Add to Cart
+          </button>
         </div>
-      {% endif %}
-
-      <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300 z-30">
-        <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-          Add to Cart
-        </button>
-      </div>
 
       </div>
 
@@ -72,9 +87,11 @@
         <h2 class="text-white font-semibold text-base tracking-wide">{{ product.product_name }}</h2>
         <p class="text-gray-400 text-xs mt-1">{{ product.product_brand }}</p>
         <p class="text-gray-400 text-xs mt-1">{{ product.product_size.product_size }}</p>
+        <p class="text-gray-400 text-xs mt-1">{{ product.product_gender.product_gender }}</p>
         <div class="flex items-center justify-between mt-3">
           <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.product_price }}</span>
-          <span class="text-xs text-gray-500 line-through">&#8369;{{ product.product_quantity }}</span>
+          <span class="text-xs text-gray-500">Quantity: {{ product.product_quantity }}</span>
+
         </div>
       </div>
 
@@ -100,18 +117,6 @@
   </div>
 
 </div>
-
-<style>
-  .active-tab {
-    background-color: #facc15 !important;
-    color: #000000 !important;
-    border-color: #facc15 !important;
-  }
-  .product-card {
-    position: relative;
-    will-change: transform, opacity;
-  }
-</style>
 
 <script>
   const CSRF = '{{ csrf_token }}';
@@ -232,7 +237,7 @@
         card.classList.add('opacity-0', 'translate-y-6');
       });
       filteredCards = allCards.filter(card =>
-        targetGender === 'all' || card.dataset.category === targetGender
+        targetGender === 'all' || card.dataset.gender === targetGender
       );
       currentPage = 0;
       revealCards(filteredCards, 0, PAGE_SIZE);

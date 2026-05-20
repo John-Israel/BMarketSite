@@ -19,12 +19,17 @@
     <!-- Welcome Card -->
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-full bg-blue-900/60 flex items-center justify-center text-blue-400 font-medium text-base flex-shrink-0">
-          {{ request.user.username|slice:":2"|upper }}
+        <div >
+          {% if user.profile_pic.url %}
+            <img src="{{ user.profile_pic.url }}" alt="{{ user.username }}"
+              class="w-12 h-12 rounded-full bg-blue-900/60 flex items-center justify-center text-blue-400 font-medium text-base flex-shrink-0">
+          {% else %}
+              <i class="ti ti-shoe text-3xl text-gray-600">hi</i>
+          {% endif %}
         </div>
         <div>
           <p class="text-xs text-yellow-400 uppercase tracking-widest font-medium">Welcome back</p>
-          <p class="text-xl font-medium text-white mt-0.5">Hey, {{ request.user.username }}! 👋</p>
+          <p class="text-xl font-medium text-white mt-0.5">Hey, {{ user.username }}! 👋</p>
           <p class="text-xs text-gray-400 mt-0.5">Browse our latest deals below.</p>
         </div>
       </div>
@@ -186,7 +191,7 @@
                onload="revealCard(this)">
         </div>
         <div class="p-4">
-          <!-- Skeleton -->
+          <!-- Lazy loading -->
           <div class="text-skeleton space-y-2">
             <div class="h-3.5 bg-gray-700 rounded animate-pulse w-3/4"></div>
             <div class="h-3 bg-gray-700 rounded animate-pulse w-1/2"></div>
@@ -214,7 +219,7 @@
       {% endfor %}
     </div>
 
-    <!-- Scroll Loader -->
+    <!-- Kung mag scroll ka load -->
     <div id="scroll-loader" class="hidden flex justify-center items-center gap-2 py-10">
       <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0s"></div>
       <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0.15s"></div>
