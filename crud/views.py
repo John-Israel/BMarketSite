@@ -50,7 +50,8 @@ def home(request):
         products = Products.objects.select_related('product_gender', 'product_size')[:4]
         data = {
             'products': products,
-            'recent_orders': recent_orders
+            'recent_orders': recent_orders,
+            'user': user
         }
         return render(request, 'page/home.html', data)
     except Exception as e:
@@ -252,6 +253,8 @@ def remove_history(request):
 
 # ── Sign Up ───────────────────────────────────────────────────────────────────
 
+from django.db import IntegrityError  # add this import at the top
+
 def sign_up(request):
     try:
         if request.method == 'POST':
@@ -274,28 +277,31 @@ def sign_up(request):
             if len(password) < 8:
                 messages.error(request, 'Password must be at least 8 characters!')
                 return redirect('/users/add')
-            Users.objects.create(
-                full_name=fullname,
-                gender=Genders.objects.get(pk=gender),
-                birthdate=birthdate,
-                address=address,
-                contact_number=contactNumber,
-                email=email,
-                username=username,
-                password=hashed_password,
-                profile_pic=profile_pic
-            )
-            messages.success(request,'User added succesfully! ')
+
+            try:
+                Users.objects.create(
+                    full_name=fullname,
+                    gender=Genders.objects.get(pk=gender),
+                    birthdate=birthdate,
+                    address=address,
+                    contact_number=contactNumber,
+                    email=email,
+                    username=username,
+                    password=hashed_password,
+                    profile_pic=profile_pic
+                )
+            except IntegrityError:
+                messages.error(request, 'Username already taken. Please choose a different one.')
+                return redirect('/page/sign_up')
+
+            messages.success(request, 'Account created successfully!')
             return redirect('/page/Log_in')
         else:
             gender_list = Genders.objects.all()
-            data = {
-                'genders': gender_list
-            }
+            data = {'genders': gender_list}
             return render(request, 'page/sign_up.html', data)
     except Exception as e:
-        return HttpResponse(f"An error occurred during add user: {e}")
-    
+        return HttpResponse(f"An error occurred during add user: {e}")    
 def manage(request):
     try:
         user_id = request.session.get('user_id')
