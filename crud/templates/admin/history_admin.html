@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin – Purchase History</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    * { font-family: 'DM Sans', sans-serif; }
+    h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
+
+    .glass {
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    html:not(.dark) .glass {
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .order-row { transition: background 0.15s; }
+    .order-row:hover { background: rgba(250,204,21,0.04); }
+
+    /* search highlight */
+    mark { background: rgba(250,204,21,0.35); color: inherit; border-radius: 2px; padding: 0 2px; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 99px; }
+
+    /* animated underline for active search */
+    .search-active { border-color: #facc15 !important; box-shadow: 0 0 0 3px rgba(250,204,21,0.15); }
+
+    /* slide-in rows */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.3s ease both; }
+  </style>
+</head>
+
+<body class="bg-gray-950 dark:bg-gray-950 text-white min-h-screen transition-colors duration-300"
+      style="background: radial-gradient(ellipse at 20% 0%, rgba(250,204,21,0.06) 0%, transparent 60%), #030712;">
+
+  <!-- ── Include your existing navbar partial here ── -->
+  <!-- {% include 'admin/navbar.html' %} -->
+  <!-- For standalone preview a minimal nav is inlined below; replace with your include -->
+  <nav class="bg-gray-900 fixed w-full z-20 top-0 border-b border-gray-800">
+    <div class="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/admin/admin_home" class="flex items-center gap-2">
+        <div class="h-8 w-8 bg-yellow-400 rounded-xl flex items-center justify-center">
+          <svg class="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13.5 2C10 2 7 4.5 5.5 8H4a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1h1.05A7.5 7.5 0 0 0 11 17.93V20H9v2h6v-2h-2v-2.07A7.5 7.5 0 0 0 21 11V9.5C21 5.36 17.64 2 13.5 2z"/>
+          </svg>
+        </div>
+        <span class="text-white font-bold text-lg tracking-wide" style="font-family:Syne,sans-serif">ShoeShop</span>
+      </a>
+      <div class="flex items-center gap-5 text-sm">
+        <a href="/admin/admin_home"  class="text-gray-400 hover:text-yellow-400 transition-colors">Home</a>
+        <a href="/admin/product_list" class="text-gray-400 hover:text-yellow-400 transition-colors">Products</a>
+        <a href="/admin/user_list"    class="text-gray-400 hover:text-yellow-400 transition-colors">Userlist</a>
+        <a href="/admin/admin_history" class="text-yellow-400 font-semibold">History</a>
+        <a href="/page/Log_in" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-colors">Log out</a>
+      </div>
+    </div>
+  </nav>
+  <!-- ── end nav ── -->
+
+  <main class="pt-24 pb-16 px-4 max-w-screen-xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div>
+        <p class="tag text-yellow-400 mb-1">Admin Panel</p>
+        <h1 class="text-3xl font-display font-bold text-white" style="font-family:Syne,sans-serif">Purchase History</h1>
+        <p class="text-gray-400 text-sm mt-1">All user orders across the platform</p>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="flex gap-3 flex-wrap">
+        <div class="glass rounded-2xl px-4 py-2.5 text-center min-w-[90px]">
+          <p class="text-yellow-400 text-xl font-bold font-display" id="stat-orders">{{ total_orders }}</p>
+          <p class="text-gray-400 text-xs mt-0.5">Orders</p>
+        </div>
+        <div class="glass rounded-2xl px-4 py-2.5 text-center min-w-[90px]">
+          <p class="text-yellow-400 text-xl font-bold font-display" id="stat-items">{{ total_items }}</p>
+          <p class="text-gray-400 text-xs mt-0.5">Items Sold</p>
+        </div>
+        <div class="glass rounded-2xl px-4 py-2.5 text-center min-w-[120px]">
+          <p class="text-yellow-400 text-xl font-bold font-display">₱{{ total_revenue|floatformat:0 }}</p>
+          <p class="text-gray-400 text-xs mt-0.5">Revenue</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search + Filter bar -->
+    <div class="glass rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input id="search-input" type="text" placeholder="Search by name, email, product, payment…"
+               oninput="filterTable()"
+               class="w-full bg-gray-800/60 border border-gray-700 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition-all duration-200 focus:border-yellow-400"/>
+      </div>
+      <select id="filter-method" onchange="filterTable()"
+              class="bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-yellow-400 transition-all duration-200 cursor-pointer">
+        <option value="">All payment methods</option>
+        <option value="gcash">GCash</option>
+        <option value="cod">Cash on Delivery</option>
+        <option value="card">Credit/Debit Card</option>
+      </select>
+      <button onclick="clearSearch()"
+              class="bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap">
+        Clear
+      </button>
+    </div>
+
+    <!-- No-results notice (hidden by default) -->
+    <div id="no-results" class="hidden text-center py-16">
+      <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <p class="text-gray-500 text-sm">No orders match your search.</p>
+    </div>
+
+    <!-- Orders list -->
+    <div id="orders-container" class="space-y-5">
+
+      {% for entry in order_entries %}
+      <!-- one card per user-order pair -->
+      <div class="order-card glass rounded-2xl overflow-hidden fade-up" style="animation-delay: {{ forloop.counter0 }}0ms"
+           data-search="{{ entry.user.full_name|lower }} {{ entry.user.email|lower }} {{ entry.order.method|lower }} {% for item in entry.order.items %}{{ item.name|lower }} {% endfor %}">
+
+        <!-- Card header: user info -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 border-b border-white/5">
+          <!-- Avatar -->
+          <div class="flex-shrink-0">
+            {% if entry.user.profile_pic %}
+              <img src="{{ entry.user.profile_pic.url }}" alt="{{ entry.user.full_name }}"
+                   class="w-12 h-12 rounded-xl object-cover ring-2 ring-yellow-400/30"/>
+            {% else %}
+              <div class="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center ring-2 ring-yellow-400/20">
+                <span class="text-yellow-400 font-bold text-lg font-display">{{ entry.user.full_name|slice:":1"|upper }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- User details -->
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-white font-semibold text-sm truncate searchable">{{ entry.user.full_name }}</p>
+              <span class="tag bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded-full">
+                {{ entry.user.gender }}
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
+              <p class="text-gray-400 text-xs searchable">{{ entry.user.email }}</p>
+              <p class="text-gray-500 text-xs">{{ entry.user.address }}</p>
+            </div>
+          </div>
+
+          <!-- Order meta -->
+          <div class="flex flex-col items-end gap-1 text-right">
+            <span class="tag px-2.5 py-1 rounded-full
+              {% if entry.order.method == 'gcash' %}bg-blue-500/15 text-blue-400
+              {% elif entry.order.method == 'cod' %}bg-green-500/15 text-green-400
+              {% else %}bg-purple-500/15 text-purple-400{% endif %}
+              searchable">
+              {% if entry.order.method == 'gcash' %}
+                💙 GCash
+                {% if entry.order.gcash_name %}· {{ entry.order.gcash_name }}{% endif %}
+              {% elif entry.order.method == 'cod' %}
+                💵 Cash on Delivery
+              {% else %}
+                💳 {{ entry.order.method|title }}
+              {% endif %}
+            </span>
+            <p class="text-gray-500 text-xs">{{ entry.order.date }}</p>
+          </div>
+        </div>
+
+        <!-- Items table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-gray-600 text-xs uppercase tracking-wider border-b border-white/5">
+                <th class="px-5 py-2.5 text-left font-medium">Product</th>
+                <th class="px-4 py-2.5 text-center font-medium">Qty</th>
+                <th class="px-4 py-2.5 text-right font-medium">Unit</th>
+                <th class="px-5 py-2.5 text-right font-medium">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in entry.order.items %}
+              <tr class="order-row border-b border-white/[0.03]">
+                <td class="px-5 py-3 flex items-center gap-3">
+                  {% if item.img %}
+                  <img src="{% static item.img %}" alt="{{ item.name }}"
+                       class="w-9 h-9 rounded-lg object-cover bg-gray-800 flex-shrink-0"
+                       onerror="this.style.display='none'"/>
+                  {% endif %}
+                  <div>
+                    <p class="text-white font-medium leading-tight searchable">{{ item.name }}</p>
+                    <p class="text-gray-500 text-xs">{{ item.desc }}</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center text-gray-300">{{ item.qty }}</td>
+                <td class="px-4 py-3 text-right text-gray-300">₱{{ item.price }}</td>
+                <td class="px-5 py-3 text-right text-yellow-400 font-semibold">₱{% widthratio item.price 1 item.qty %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="px-5 py-3 text-right text-gray-400 text-xs font-medium uppercase tracking-wider">Order Total</td>
+                <td class="px-5 py-3 text-right text-white font-bold text-base">₱{{ entry.order.subtotal }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+      {% empty %}
+      <div class="text-center py-20">
+        <svg class="w-14 h-14 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <p class="text-gray-500 text-sm font-medium">No purchase history found.</p>
+        <p class="text-gray-700 text-xs mt-1">Orders will appear here once users complete a purchase.</p>
+      </div>
+      {% endfor %}
+
+    </div>
+  </main>
+
+  <!-- ── Search / Filter JS ── -->
+  <script>
+    function filterTable() {
+      const query  = document.getElementById('search-input').value.trim().toLowerCase();
+      const method = document.getElementById('filter-method').value.toLowerCase();
+      const cards  = document.querySelectorAll('.order-card');
+      let visible  = 0;
+
+      // Highlight helper
+      function highlight(el, q) {
+        el.querySelectorAll('.searchable').forEach(node => {
+          const orig = node.getAttribute('data-orig') || node.textContent;
+          node.setAttribute('data-orig', orig);
+          if (!q) { node.innerHTML = orig; return; }
+          const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+          node.innerHTML = orig.replace(re, '<mark>$1</mark>');
+        });
+      }
+
+      cards.forEach(card => {
+        const searchData = card.getAttribute('data-search') || '';
+        const matchQuery  = !query  || searchData.includes(query);
+        const matchMethod = !method || searchData.includes(method);
+        const show = matchQuery && matchMethod;
+        card.style.display = show ? '' : 'none';
+        if (show) { visible++; highlight(card, query); }
+      });
+
+      document.getElementById('no-results').classList.toggle('hidden', visible > 0 || cards.length === 0);
+      document.getElementById('search-input').classList.toggle('search-active', query.length > 0);
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('filter-method').value = '';
+      filterTable();
+    }
+  </script>
+
+</body>
+</html>

@@ -147,31 +147,38 @@
     </div>
 
     <!-- About Us -->
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-start gap-5 flex-wrap">
-      <div class="w-14 h-14 rounded-xl bg-yellow-400/10 flex items-center justify-center flex-shrink-0">
-        <i class="ti ti-building-store text-yellow-400 text-2xl"></i>
-      </div>
-      <div class="flex-1 min-w-48">
-        <p class="text-base font-medium text-white mb-1.5">About Us</p>
-        <p class="text-xs text-gray-400 leading-relaxed">
-          We are a passionate team dedicated to bringing you the best footwear at affordable prices.
-          From classic styles to the latest trends, our store is your one-stop shop for quality shoes.
-          We believe everyone deserves to walk in comfort and style.
-        </p>
-        <div class="flex gap-5 mt-4 flex-wrap">
-          <div class="flex items-center gap-1.5 text-xs text-gray-400">
-            <i class="ti ti-truck-delivery text-yellow-400"></i> Fast Delivery
-          </div>
-          <div class="flex items-center gap-1.5 text-xs text-gray-400">
-            <i class="ti ti-shield-check text-yellow-400"></i> Secure Payments
-          </div>
-          <div class="flex items-center gap-1.5 text-xs text-gray-400">
-            <i class="ti ti-headset text-yellow-400"></i> 24/7 Support
-          </div>
+<div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex items-stretch flex-wrap">
+
+  <!-- Left image panel -->
+  <div class="w-36 shrink-0 bg-cover bg-center hidden sm:block"
+       style="background-image: url('{% static 'picture/home/home.png' %}');">
+    <div class="w-full h-full bg-black/50"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex items-start p-5 flex-1">
+    <div class="flex-1 min-w-48">
+      <p class="text-base font-medium text-white mb-1.5">About Us</p>
+      <p class="text-xs text-gray-400 leading-relaxed">
+        We are a group of students trying their best to maintain this site.
+        We assure you an awesome and safe experience while using our platform.
+        We can also assure you of :
+      </p>
+      <div class="flex gap-5 mt-4 flex-wrap">
+        <div class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-yellow-400 transition-colors duration-200 cursor-default">
+          <i class="ti ti-truck-delivery text-yellow-400"></i> Fast Delivery
+        </div>
+        <div class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-yellow-400 transition-colors duration-200 cursor-default">
+          <i class="ti ti-shield-check text-yellow-400"></i> Secure Payments
+        </div>
+        <div class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-yellow-400 transition-colors duration-200 cursor-default">
+          <i class="ti ti-headset text-yellow-400"></i> 24/7 Support
         </div>
       </div>
     </div>
+  </div>
 
+</div>
     <!-- Today's Deals Header -->
     <div class="text-center pt-4">
       <h2 class="text-2xl font-bold text-yellow-400 tracking-widest uppercase">Today's Deals</h2>

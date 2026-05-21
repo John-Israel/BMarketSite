@@ -16,7 +16,7 @@
   </div>
 
   <!-- Search + Filter Row -->
-  <div class="max-w-screen-xl mx-auto mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+  <div class="max-w-screen-xl mx-auto mb-4 flex flex-col sm:flex-row items-center justify-center gap-3">
 
     <!-- Search Bar -->
     <div class="relative w-full max-w-md">
@@ -35,30 +35,30 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0 2.25 2.25M17.25 9v12"/>
         </svg>
         Filter
+        <!-- Badge shows how many filters are active -->
+        <span id="filter-badge" class="hidden bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">0</span>
         <svg id="filter-chevron" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
         </svg>
       </button>
 
-      <!-- Dropdown Panel -->
+      <!-- Dropdown Panel — w-64 so brand names never wrap to two lines -->
       <div id="filter-panel"
-        class="hidden absolute right-0 mt-2 w-52 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        class="hidden absolute right-0 mt-2 w-64 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
 
         <!-- Brand Section -->
         <div class="px-4 pt-4 pb-2">
           <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Brand</p>
           <ul id="brand-list" class="space-y-0.5">
             <li>
-              <span class="brand-btn w-full text-left text-sm px-3 py-2 rounded-lg text-yellow-400 bg-gray-800 font-semibold transition-all duration-150" data-brand="all">All Brands</span>
-              
+              <button class="brand-btn w-full text-left text-sm px-3 py-2 rounded-lg text-yellow-400 bg-gray-800 font-semibold transition-all duration-150" data-brand="all">
+                All Brands
+              </button>
             </li>
-            {% for product in products %}
-              <!-- JS will build this dynamically -->
-            {% endfor %}
           </ul>
         </div>
 
-        <div class="mx-4 my-1 border-t border-gray-800"></div>
+        <div class="mx-4 my-2 border-t border-gray-800"></div>
 
         <!-- Gender Section -->
         <div class="px-4 pt-2 pb-3">
@@ -82,7 +82,7 @@
           </ul>
         </div>
 
-        <div class="mx-4 mb-3 border-t border-gray-800"></div>
+        <div class="mx-4 mb-2 border-t border-gray-800"></div>
         <div class="px-4 pb-4">
           <button id="reset-filters"
             class="w-full text-xs text-gray-500 hover:text-yellow-400 py-1.5 transition-colors duration-150">
@@ -91,6 +91,12 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Active Filter Pills — always visible below the search bar -->
+  <!-- Each pill has an X button to remove that filter without opening the dropdown -->
+  <div id="active-pills" class="max-w-screen-xl mx-auto mb-6 flex flex-wrap gap-2 justify-center min-h-[28px]">
+    <!-- Injected by JS -->
   </div>
 
   <!-- Product Grid -->
@@ -140,11 +146,21 @@
       <div class="p-4">
         <h2 class="text-white font-semibold text-base tracking-wide">{{ product.product_name }}</h2>
         <p class="text-gray-400 text-xs mt-1">{{ product.product_brand }}</p>
-        <p class="text-gray-400 text-xs mt-1">{{ product.product_size.product_size }}</p>
+        <p class="text-gray-400 text-xs mt-1">Size: {{ product.product_size.product_size }}</p>
         <p class="text-gray-400 text-xs mt-1">{{ product.product_gender.product_gender }}</p>
         <div class="flex items-center justify-between mt-3">
           <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.product_price }}</span>
-          <span class="text-xs text-gray-500">Qty: {{ product.product_quantity }}</span>
+          <!-- Color-coded stock status instead of a raw number -->
+          <span class="text-xs font-medium
+            {% if product.product_quantity == 0 %}text-red-400
+            {% elif product.product_quantity <= 5 %}text-orange-400
+            {% elif product.product_quantity <= 10 %}text-yellow-500
+            {% else %}text-green-500{% endif %}">
+            {% if product.product_quantity == 0 %}Out of stock
+            {% elif product.product_quantity <= 5 %}Only {{ product.product_quantity }} left!
+            {% elif product.product_quantity <= 10 %}Low stock
+            {% else %}In stock{% endif %}
+          </span>
         </div>
       </div>
     </div>
@@ -170,15 +186,17 @@
 </div>
 
 <script>
-  const CSRF = '{{ csrf_token }}';
+  const CSRF      = '{{ csrf_token }}';
   const PAGE_SIZE = 8;
-  let currentPage = 0;
-  let isLoading = false;
+  let currentPage   = 0;
+  let isLoading     = false;
   let filteredCards = [];
 
-  const allCards = Array.from(document.querySelectorAll('.product-card'));
+  const allCards     = Array.from(document.querySelectorAll('.product-card'));
   const scrollLoader = document.getElementById('scroll-loader');
-  const noResults = document.getElementById('no-results');
+  const noResults    = document.getElementById('no-results');
+  const filterBadge  = document.getElementById('filter-badge');
+  const activePills  = document.getElementById('active-pills');
 
   let activeBrand  = 'all';
   let activeGender = 'all';
@@ -198,24 +216,69 @@
     brandList.appendChild(li);
   });
 
-  // ── FILTER DROPDOWN TOGGLE ────────────────────────────────────────────────
-  const filterToggle  = document.getElementById('filter-toggle');
-  const filterPanel   = document.getElementById('filter-panel');
-  const filterChevron = document.getElementById('filter-chevron');
+  // ── BADGE + PILLS ─────────────────────────────────────────────────────────
+  function updateBadgeAndPills() {
+    let count = 0;
+    if (activeBrand  !== 'all') count++;
+    if (activeGender !== 'all') count++;
 
-  filterToggle.addEventListener('click', function(e) {
-    e.stopPropagation();
-    const open = !filterPanel.classList.contains('hidden');
-    filterPanel.classList.toggle('hidden', open);
-    filterChevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
-  });
+    filterBadge.textContent = count;
+    count > 0 ? filterBadge.classList.remove('hidden') : filterBadge.classList.add('hidden');
 
-  document.addEventListener('click', function() {
-    filterPanel.classList.add('hidden');
-    filterChevron.style.transform = 'rotate(0deg)';
-  });
+    activePills.innerHTML = '';
 
-  filterPanel.addEventListener('click', e => e.stopPropagation());
+    if (activeBrand !== 'all') {
+      activePills.appendChild(makePill(
+        activeBrand.charAt(0).toUpperCase() + activeBrand.slice(1),
+        () => { activeBrand = 'all'; syncBrandButtons(); applyFilters(); }
+      ));
+    }
+    if (activeGender !== 'all') {
+      activePills.appendChild(makePill(
+        activeGender.charAt(0).toUpperCase() + activeGender.slice(1),
+        () => { activeGender = 'all'; syncGenderButtons(); applyFilters(); }
+      ));
+    }
+    if (searchQuery !== '') {
+      activePills.appendChild(makePill(
+        'Search: "' + searchQuery + '"',
+        () => { searchQuery = ''; document.getElementById('search').value = ''; applyFilters(); }
+      ));
+    }
+  }
+
+  function makePill(label, onRemove) {
+    const pill = document.createElement('span');
+    pill.className = 'inline-flex items-center gap-1.5 bg-yellow-400 bg-opacity-10 border border-yellow-400 border-opacity-40 text-yellow-400 text-xs font-semibold px-3 py-1 rounded-full';
+    pill.innerHTML = label +
+      '<button class="hover:text-white transition-colors leading-none" aria-label="Remove filter">' +
+      '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">' +
+      '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>' +
+      '</svg></button>';
+    pill.querySelector('button').addEventListener('click', onRemove);
+    return pill;
+  }
+
+  // ── SYNC BUTTON HIGHLIGHTS ────────────────────────────────────────────────
+  function syncBrandButtons() {
+    document.querySelectorAll('.brand-btn').forEach(b => {
+      const on = b.dataset.brand === activeBrand;
+      b.classList.toggle('text-yellow-400', on);
+      b.classList.toggle('bg-gray-800',     on);
+      b.classList.toggle('font-semibold',   on);
+      b.classList.toggle('text-gray-400',  !on);
+    });
+  }
+
+  function syncGenderButtons() {
+    document.querySelectorAll('.gender-btn').forEach(b => {
+      const on = b.dataset.gender === activeGender;
+      b.classList.toggle('text-yellow-400', on);
+      b.classList.toggle('bg-gray-800',     on);
+      b.classList.toggle('font-semibold',   on);
+      b.classList.toggle('text-gray-400',  !on);
+    });
+  }
 
   // ── SHARED FILTER LOGIC ───────────────────────────────────────────────────
   function applyFilters() {
@@ -234,6 +297,7 @@
     });
 
     currentPage = 0;
+    updateBadgeAndPills();
 
     if (filteredCards.length === 0) {
       noResults.classList.remove('hidden');
@@ -243,19 +307,31 @@
     }
   }
 
+  // ── FILTER DROPDOWN TOGGLE ────────────────────────────────────────────────
+  const filterToggle  = document.getElementById('filter-toggle');
+  const filterPanel   = document.getElementById('filter-panel');
+  const filterChevron = document.getElementById('filter-chevron');
+
+  filterToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOpen = !filterPanel.classList.contains('hidden');
+    filterPanel.classList.toggle('hidden', isOpen);
+    filterChevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  });
+
+  document.addEventListener('click', function() {
+    filterPanel.classList.add('hidden');
+    filterChevron.style.transform = 'rotate(0deg)';
+  });
+
+  filterPanel.addEventListener('click', e => e.stopPropagation());
+
   // ── BRAND FILTER ──────────────────────────────────────────────────────────
   document.getElementById('brand-list').addEventListener('click', function(e) {
     const btn = e.target.closest('.brand-btn');
     if (!btn) return;
     activeBrand = btn.dataset.brand;
-
-    document.querySelectorAll('.brand-btn').forEach(b => {
-      b.classList.remove('text-yellow-400', 'bg-gray-800', 'font-semibold');
-      b.classList.add('text-gray-400');
-    });
-    btn.classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
-    btn.classList.remove('text-gray-400');
-
+    syncBrandButtons();
     applyFilters();
   });
 
@@ -263,14 +339,7 @@
   document.querySelectorAll('.gender-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       activeGender = this.dataset.gender;
-
-      document.querySelectorAll('.gender-btn').forEach(b => {
-        b.classList.remove('text-yellow-400', 'bg-gray-800', 'font-semibold');
-        b.classList.add('text-gray-400');
-      });
-      this.classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
-      this.classList.remove('text-gray-400');
-
+      syncGenderButtons();
       applyFilters();
     });
   });
@@ -279,14 +348,8 @@
   document.getElementById('reset-filters').addEventListener('click', function() {
     activeBrand  = 'all';
     activeGender = 'all';
-
-    document.querySelectorAll('.brand-btn, .gender-btn').forEach(b => {
-      b.classList.remove('text-yellow-400', 'bg-gray-800', 'font-semibold');
-      b.classList.add('text-gray-400');
-    });
-    document.querySelector('.brand-btn[data-brand="all"]').classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
-    document.querySelector('.gender-btn[data-gender="all"]').classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
-
+    syncBrandButtons();
+    syncGenderButtons();
     applyFilters();
     filterPanel.classList.add('hidden');
     filterChevron.style.transform = 'rotate(0deg)';

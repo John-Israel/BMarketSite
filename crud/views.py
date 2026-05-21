@@ -298,6 +298,8 @@ def contact(request):
 
 # ── Sign Up ───────────────────────────────────────────────────────────────────
 
+from django.db import IntegrityError  # add this import at the top
+
 def sign_up(request):
     try:
         if request.method == 'POST':
