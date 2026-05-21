@@ -5,6 +5,7 @@
 
 {% block 'content' %}
 {% include "include/navbar.html" %}
+{% include "include/toast.html" %}
 
 
 <div class="min-h-screen bg-gray-950 pt-24 pb-16 px-4 transition-colors duration-300" id="manage-page">
@@ -78,7 +79,7 @@
           <!-- Username (read-only) -->
           <div>
             <label for="username" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Username</label>
-            <input type="text" id="username"
+            <input type="text" name="username" id="username"
                    value="{{ user.username }}"
                    class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"/>
             <p class="text-xs text-gray-600 mt-1">Username cannot be changed.</p>
@@ -124,7 +125,7 @@
               <input type="password" name="new_password" id="new_password"
                      class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 pr-11 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
                      placeholder="••••••••"/>
-              <button type="button" onclick="togglePwd('new_password','eye_new')"
+              <button type="button" onclick="togglePwd('new_password')"
                       class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-yellow-400 transition-colors duration-200">
                 <svg id="eye_new" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
@@ -141,7 +142,7 @@
               <input type="password" name="confirm_new_password" id="confirm_new_password"
                      class="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-xl px-4 py-3 pr-11 placeholder-gray-600 outline-none focus:border-yellow-400 hover:border-gray-600 transition-colors duration-200"
                      placeholder="••••••••"/>
-              <button type="button" onclick="togglePwd('confirm_new_password','eye_confirm')"
+              <button type="button" onclick="togglePwd('confirm_new_password')"
                       class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-yellow-400 transition-colors duration-200">
                 <svg id="eye_confirm" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
@@ -236,7 +237,51 @@
 </div>
 
 <script>
-  /* Profile picture preview */
+  /* ── TOAST ── */
+  function showToast(message, type) {
+    var isSuccess = (type !== 'error');
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.4);font-weight:700;font-size:14px;opacity:0;transform:translateY(16px);transition:all 0.4s ease;';
+    el.style.background = isSuccess ? '#facc15' : '#ef4444';
+    el.style.color      = isSuccess ? '#111827' : '#ffffff';
+    var icon = isSuccess
+      ? '<svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>'
+      : '<svg style="width:20px;height:20px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>';
+    el.innerHTML = icon + '<span>' + message + '</span>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function () {
+      el.style.opacity   = '1';
+      el.style.transform = 'translateY(0)';
+    });
+    setTimeout(function () {
+      el.style.opacity   = '0';
+      el.style.transform = 'translateY(16px)';
+      setTimeout(function () { el.remove(); }, 400);
+    }, 3000);
+  }
+
+  /* Fire toast based on URL ?status= param, then strip it so reloads don't retrigger */
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    const reason = params.get('reason');
+    if (status === 'success') {
+      showToast('Account updated successfully!', 'success');
+    } else if (status === 'error') {
+      const msg = reason === 'password_mismatch'  ? 'Passwords do not match.'
+                : reason === 'password_too_short' ? 'Password must be at least 8 characters.'
+                : reason === 'username_taken'     ? 'Username is already taken.'
+                : 'Something went wrong. Please try again.';
+      showToast(msg, 'error');
+    }
+    // Remove ?status from URL so refreshing doesn't retrigger the toast
+    if (status) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  })();
+
+  /* ── PROFILE PICTURE PREVIEW ── */
   document.getElementById('profile_pic').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -247,7 +292,7 @@
     reader.readAsDataURL(file);
   });
 
-  /* Password match live check */
+  /* ── PASSWORD MATCH LIVE CHECK ── */
   const newPwd     = document.getElementById('new_password');
   const confPwd    = document.getElementById('confirm_new_password');
   const pwdError   = document.getElementById('pwd_error');
@@ -277,13 +322,13 @@
   newPwd.addEventListener('input', checkPasswords);
   confPwd.addEventListener('input', checkPasswords);
 
-  /* Password visibility toggle */
+  /* ── PASSWORD VISIBILITY TOGGLE ── */
   function togglePwd(inputId) {
     const input = document.getElementById(inputId);
     input.type = input.type === 'password' ? 'text' : 'password';
   }
 
-  /* Delete modal */
+  /* ── DELETE MODAL ── */
   function openDeleteModal()  { document.getElementById('delete-modal').classList.remove('hidden'); }
   function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
 

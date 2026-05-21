@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
@@ -6,7 +5,13 @@ from django.contrib import messages
 from .models import Payment, Product_Size, Users, Genders, Admin, Products, Product_Gender, Cart, History
 import json, uuid
 from django.db.models import Sum
+from functools import wraps
 
+
+# ── Session Guard Decorators ──────────────────────────────────────────────────
+
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
 
 def Log_in(request):
     try:
@@ -14,6 +19,7 @@ def Log_in(request):
             username = request.POST.get('username')
             password = request.POST.get('password')
             user = Users.objects.filter(username=username).first()
+
             if user is None:
                 admin = Admin.objects.filter(username=username).first()
                 if admin and check_password(password, admin.password):
@@ -22,6 +28,7 @@ def Log_in(request):
                 else:
                     messages.error(request, 'Invalid username or password!')
                     return redirect('/page/Log_in')
+
             if user and check_password(password, user.password):
                 request.session['user_id'] = user.user_id
                 return redirect('/page/home')
@@ -32,8 +39,31 @@ def Log_in(request):
             return render(request, 'page/Log_in.html')
     except Exception as e:
         return HttpResponse(f"An error occurred during login: {e}")
+    
+def login_required(view_func):
+    """Redirects to login page if no user session is found."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('user_id'):
+            messages.error(request, 'You must be logged in to access that page.')
+            return redirect('/page/Log_in')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def admin_required(view_func):
+    """Redirects to login page if no admin session is found."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('admin_id'):
+            messages.error(request, 'Admin access required.')
+            return redirect('/page/Log_in')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 
 def get_current_user(request):
+    """Returns the logged-in User object, or None."""
     user_id = request.session.get('user_id')
     if not user_id:
         return None
@@ -43,22 +73,32 @@ def get_current_user(request):
         return None
 
 
+
+def log_out(request):
+    request.session.flush()
+    messages.success(request, 'You have been logged out.')
+    return redirect('/page/Log_in')
+
+
+# ── User Views ────────────────────────────────────────────────────────────────
+
+@login_required
 def home(request):
     try:
         user = get_current_user(request)
-        users = Users.objects.get(pk=user.user_id)
         recent_orders = History.objects.filter(buyer=user)[:3]
         products = Products.objects.select_related('product_gender', 'product_size')[:4]
         data = {
             'products': products,
             'recent_orders': recent_orders,
-            'user': users
+            'user': user
         }
         return render(request, 'page/home.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during home view: {e}")
-    
 
+
+@login_required
 def shop(request):
     try:
         products = Products.objects.select_related('product_gender', 'product_size')
@@ -70,15 +110,16 @@ def shop(request):
         return HttpResponse(f"An error occurred during shop view: {e}")
 
 
-# ── Cart helpers ──────────────────────────────────────────────────────────────
+# ── Cart ──────────────────────────────────────────────────────────────────────
 
+@login_required
 def cart(request):
     try:
         user = get_current_user(request)
-        cart = Cart.objects.filter(user=user).select_related('product_name', 'product_size')
-        subtotal = sum(int(item.product_price if item.product_price else 0) * item.quantity for item in cart)
+        cart_items = Cart.objects.filter(user=user).select_related('product_name', 'product_size')
+        subtotal = sum(int(item.product_price if item.product_price else 0) * item.quantity for item in cart_items)
         data = {
-            'cart': cart,
+            'cart': cart_items,
             'subtotal': subtotal,
             'total': subtotal,
         }
@@ -87,16 +128,18 @@ def cart(request):
         return HttpResponse(f"An error occurred during cart retrieval: {e}")
 
 
+@login_required
 def cart_add(request, productId):
     if request.method == 'POST':
         try:
             user = get_current_user(request)
             product = Products.objects.get(pk=productId)
             product_size = Product_Size.objects.get(pk=product.product_size_id)
+
             cart_item, created = Cart.objects.get_or_create(
                 product_name=product,
                 product_size=product_size,
-                user=user,          # ← scope to the logged-in user
+                user=user,
                 defaults={
                     'product_price': product.product_price,
                     'quantity': 1
@@ -115,8 +158,8 @@ def cart_add(request, productId):
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
-# ── Updated Safe View Logic ───────────────────────────────────────────────────
 
+@login_required
 def cart_update(request):
     cart_id = request.GET.get('cart_id')
     delta_raw = request.GET.get('delta', '0').strip()
@@ -125,26 +168,22 @@ def cart_update(request):
     if cart_id is not None:
         try:
             cart_item = Cart.objects.get(cart_id=cart_id)
-            cart_item.quantity += delta
+            product = cart_item.product_name
+            new_quantity = cart_item.quantity + delta
 
-            if cart_item.quantity < 1:
+            if new_quantity < 1:
                 cart_item.delete()
-            elif cart_item.quantity > 10:
-                pass  # silently ignore, or return an error message
-            else:
-                cart_item.quantity = cart_item.quantity
+            elif new_quantity <= product.product_quantity:
+                cart_item.quantity = new_quantity
                 cart_item.save()
 
         except Cart.DoesNotExist:
-             pass
+            pass
 
-        # sync session to match DB
-    updated_cart = list(
-        Cart.objects.values('cart_id', 'product_name_id', 'product_price', 'quantity')
-    )
     return redirect('/page/cart')
 
 
+@login_required
 def cart_remove(request):
     try:
         cart_id = request.GET.get('cart_id')
@@ -157,7 +196,7 @@ def cart_remove(request):
 
 # ── Payment ───────────────────────────────────────────────────────────────────
 
-
+@login_required
 def payment(request):
     user = get_current_user(request)
     cart_items = Cart.objects.filter(user=user)
@@ -168,10 +207,10 @@ def payment(request):
     subtotal = sum(item.product_price * item.quantity for item in cart_items)
 
     if request.method == 'POST':
-        method_name  = request.POST.get('payment_method')  # should be 'Cash on Delivery' or 'GCash'
+        method_name  = request.POST.get('payment_method')
         gcash_number = request.POST.get('gcash_number', '')
         gcash_name   = request.POST.get('gcash_name', '')
-        order_ref = str(uuid.uuid4())[:8].upper()
+        order_ref    = str(uuid.uuid4())[:8].upper()
 
         try:
             payment_method = Payment.objects.get(payment_method=method_name)
@@ -179,10 +218,9 @@ def payment(request):
             messages.error(request, 'Invalid payment method.')
             return redirect('/page/payment')
 
-        # save each cart item as a History record
         for item in cart_items:
             History.objects.create(
-                order_ref = order_ref,
+                order_ref      = order_ref,
                 buyer          = user,
                 product_name   = item.product_name,
                 quantity       = item.quantity,
@@ -190,15 +228,15 @@ def payment(request):
                 product_price  = item.product_price,
                 product_total  = subtotal
             )
-        products = Products.objects.get(pk=item.product_name_id)
-        products.product_quantity = max(products.product_quantity - item.quantity, 0)
-        products.save() 
+            # ← Fixed: stock deduction now runs per item, inside the loop
+            product = Products.objects.get(pk=item.product_name_id)
+            product.product_quantity = max(product.product_quantity - item.quantity, 0)
+            product.save()
 
-        # clear the cart after order is placed
         cart_items.delete()
 
         request.session['last_order'] = {
-            'subtotal':     subtotal,
+            'subtotal':     float(subtotal),
             'method':       method_name,
             'gcash_number': gcash_number,
             'gcash_name':   gcash_name,
@@ -214,12 +252,16 @@ def payment(request):
         'total':      subtotal,
         'user':       user,
     })
-# ── Contact ───────────────────────────────────────────────────────────────────
+
+
+# ── History ───────────────────────────────────────────────────────────────────
+
+@login_required
 def history(request):
     try:
         user = get_current_user(request)
         orders_qs = History.objects.filter(buyer=user).select_related('product_name', 'payment_method').order_by('-created_at')
-        
+
         grouped_orders = {}
         for order in orders_qs:
             key = order.order_ref or order.history_id
@@ -229,7 +271,7 @@ def history(request):
             grouped_orders[key]['total'] += order.product_price * order.quantity
 
         subtotal = sum(int(order.product_price if order.product_price else 0) * order.quantity for order in orders_qs)
-        
+
         data = {
             'grouped_orders': grouped_orders,
             'subtotal': subtotal
@@ -239,9 +281,7 @@ def history(request):
         return HttpResponse(f"An error occurred during history retrieval: {e}")
 
 
-def contact(request):
-    return render(request, 'page/contact.html')
-
+@login_required
 def remove_history(request):
     try:
         user = get_current_user(request)
@@ -252,22 +292,25 @@ def remove_history(request):
         return HttpResponse(f"An error occurred while clearing history: {e}")
 
 
+def contact(request):
+    return render(request, 'page/contact.html')
+
+
 # ── Sign Up ───────────────────────────────────────────────────────────────────
 
 def sign_up(request):
     try:
         if request.method == 'POST':
-            fullname = request.POST.get('full_name')
-            gender = request.POST.get('gender')
-            birthdate = request.POST.get('birth_date')
-            address = request.POST.get('address')
-            contactNumber = request.POST.get('contact_number')
-            email = request.POST.get('email')
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            hashed_password = make_password(password)
-            profile_pic = request.FILES.get('profile_pic')
+            fullname       = request.POST.get('full_name')
+            gender         = request.POST.get('gender')
+            birthdate      = request.POST.get('birth_date')
+            address        = request.POST.get('address')
+            contactNumber  = request.POST.get('contact_number')
+            email          = request.POST.get('email')
+            username       = request.POST.get('username')
+            password       = request.POST.get('password')
             confirm_password = request.POST.get('confirm_password')
+            profile_pic    = request.FILES.get('profile_pic')
 
             if password != confirm_password:
                 messages.error(request, 'Passwords do not match!')
@@ -276,222 +319,216 @@ def sign_up(request):
             if len(password) < 8:
                 messages.error(request, 'Password must be at least 8 characters!')
                 return redirect('/users/add')
+
+            hashed_password = make_password(password)
+
             Users.objects.create(
-                full_name=fullname,
-                gender=Genders.objects.get(pk=gender),
-                birthdate=birthdate,
-                address=address,
-                contact_number=contactNumber,
-                email=email,
-                username=username,
-                password=hashed_password,
-                profile_pic=profile_pic
+                full_name      = fullname,
+                gender         = Genders.objects.get(pk=gender),
+                birthdate      = birthdate,
+                address        = address,
+                contact_number = contactNumber,
+                email          = email,
+                username       = username,
+                password       = hashed_password,
+                profile_pic    = profile_pic
             )
-            messages.success(request,'User added succesfully! ')
+            messages.success(request, 'Account created successfully!')
             return redirect('/page/Log_in')
         else:
-            gender_list = Genders.objects.all()
-            data = {
-                'genders': gender_list
-            }
+            data = {'genders': Genders.objects.all()}
             return render(request, 'page/sign_up.html', data)
     except Exception as e:
-        return HttpResponse(f"An error occurred during add user: {e}")
-    
+        return HttpResponse(f"An error occurred during sign up: {e}")
+
+
+# ── Manage Account ────────────────────────────────────────────────────────────
+
+@login_required
 def manage(request):
+    user_id = request.session.get('user_id')
     try:
-        user_id = request.session.get('user_id')
-        if not user_id:
-            return redirect('/page/Log_in')
-
         user = Users.objects.get(pk=user_id)
+    except Users.DoesNotExist:
+        return redirect('/page/Log_in')
 
-        if request.method == 'POST':
-            full_name      = request.POST.get('full_name')
-            email          = request.POST.get('email')
-            gender         = request.POST.get('gender')
-            birth_date     = request.POST.get('birth_date')
-            contact_number = request.POST.get('contact_number')
-            address        = request.POST.get('address')
-            new_password   = request.POST.get('new_password')
-            confirm_new    = request.POST.get('confirm_new_password')
-            profile_pic    = request.FILES.get('profile_pic')
+    if request.method == 'POST':
+        full_name      = request.POST.get('full_name', '').strip()
+        email          = request.POST.get('email', '').strip()
+        username       = request.POST.get('username', '').strip()
+        gender         = request.POST.get('gender', '').strip()
+        birth_date     = request.POST.get('birth_date', '').strip()
+        contact_number = request.POST.get('contact_number', '').strip()
+        address        = request.POST.get('address', '').strip()
+        new_password   = request.POST.get('new_password', '').strip()
+        confirm_new    = request.POST.get('confirm_new_password', '').strip()
+        profile_pic    = request.FILES.get('profile_pic')
 
-            # Password change is optional — only update if provided
-            if new_password:
-                if new_password != confirm_new:
-                    messages.error(request, 'Passwords do not match!')
-                    return redirect('/page/manage')
-                if len(new_password) < 8:
-                    messages.error(request, 'Password must be at least 8 characters!')
-                    return redirect('/page/manage')
-                user.password = make_password(new_password)
+        if new_password:
+            if new_password != confirm_new:
+                return redirect('/page/manage?status=error&reason=password_mismatch')
+            if len(new_password) < 8:
+                return redirect('/page/manage?status=error&reason=password_too_short')
+            user.password = make_password(new_password)
 
-            user.full_name      = full_name
-            user.email          = email
-            user.gender         = Genders.objects.get(pk=gender)
-            user.birthdate      = birth_date
-            user.contact_number = contact_number
-            user.address        = address
+        if username and username != user.username:
+            if Users.objects.filter(username=username).exclude(pk=user_id).exists():
+                return redirect('/page/manage?status=error&reason=username_taken')
 
-            if profile_pic:
-                user.profile_pic = profile_pic
+        user.full_name      = full_name
+        user.username       = username
+        user.email          = email
+        user.birthdate      = birth_date
+        user.contact_number = contact_number
+        user.address        = address
 
+        if gender:
+            try:
+                user.gender = Genders.objects.get(pk=gender)
+            except Genders.DoesNotExist:
+                pass
+
+        if profile_pic:
+            user.profile_pic = profile_pic
+
+        try:
             user.save()
-            messages.success(request, 'Account updated successfully!')
-            return redirect('/page/manage')
+        except Exception as e:
+            return HttpResponse(f"Save failed: {e}")
 
-        genders = Genders.objects.all()
-        return render(request, 'page/manage.html', {
-            'user':    user,
-            'genders': genders,
-        })
+        return redirect('/page/manage?status=success')
 
-    except Exception as e:
-        return HttpResponse(f"An error occurred: {e}")
+    genders = Genders.objects.all()
+    return render(request, 'page/manage.html', {
+        'user':    user,
+        'genders': genders,
+    })
 
 
+# ── Delete Account ────────────────────────────────────────────────────────────
+
+@login_required
 def delete_account(request):
     try:
         if request.method == 'POST':
             user_id = request.session.get('user_id')
-            if not user_id:
-                return redirect('/page/Log_in')
-
             user = Users.objects.get(pk=user_id)
             user.delete()
-
-            # Clear the session so they're fully logged out
             request.session.flush()
-
             messages.success(request, 'Your account has been deleted.')
             return redirect('/page/Log_in')
-
         return redirect('/page/manage')
-
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
 
-# ── Admin ─────────────────────────────────────────────────────────────────────
 
+# ── Admin Views ───────────────────────────────────────────────────────────────
+
+@admin_required
 def admin_home(request):
     try:
-        users = Users.objects.all()
-        products = Products.objects.all()
-        orders = History.objects.all()
+        users     = Users.objects.all()
+        products  = Products.objects.all()
+        orders    = History.objects.all()
         low_stock = Products.objects.filter(product_quantity__lte=10).select_related('product_gender', 'product_size')
         data = {
-            'users': users,
-            'products': products,
-            'orders': orders,
+            'users':     users,
+            'products':  products,
+            'orders':    orders,
             'low_stock': low_stock
         }
         return render(request, 'admin/admin_home.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
-    
 
 
+@admin_required
 def product_list(request):
     try:
-        products = Products.objects.select_related('product_gender')
+        products  = Products.objects.select_related('product_gender')
         low_stock = Products.objects.filter(product_quantity__lte=10).select_related('product_gender', 'product_size')
         data = {
-            'products': products,
+            'products':  products,
             'low_stock': low_stock
         }
         return render(request, 'admin/product_list.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during product list retrieval: {e}")
 
+
+@admin_required
 def add_product(request):
     try:
         if request.method == 'POST':
-            productName = request.POST.get('product_name')
-            productBrand = request.POST.get('brand')
-            productGender = request.POST.get('product_gender')
-            productSize = request.POST.get('product_size')
-            productImage = request.FILES.get('product_image')
-            productPrice = request.POST.get('price')
-            productQuantity = request.POST.get('quantity')
-            
             Products.objects.create(
-                product_name = productName,
-                product_brand = productBrand,
-                product_gender = Product_Gender.objects.get(pk=productGender),
-                product_size = Product_Size.objects.get(pk=productSize),
-                product_image = productImage,
-                product_price = productPrice,
-                product_quantity = productQuantity
+                product_name     = request.POST.get('product_name'),
+                product_brand    = request.POST.get('brand'),
+                product_gender   = Product_Gender.objects.get(pk=request.POST.get('product_gender')),
+                product_size     = Product_Size.objects.get(pk=request.POST.get('product_size')),
+                product_image    = request.FILES.get('product_image'),
+                product_price    = request.POST.get('price'),
+                product_quantity = request.POST.get('quantity')
             )
-            
-            messages.success(request,'Product added succesfully! ')
+            messages.success(request, 'Product added successfully!')
             return redirect('/admin/product_list')
         else:
-            product_gender_list = Product_Gender.objects.all()
-            product_size_list = Product_Size.objects.all()
             data = {
-                'product_genders': product_gender_list,
-                'product_sizes': product_size_list
+                'product_genders': Product_Gender.objects.all(),
+                'product_sizes':   Product_Size.objects.all()
             }
             return render(request, 'admin/add_product.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during add product: {e}")
-    
+
+
+@admin_required
 def delete_product(request, id):
     try:
+        product = Products.objects.get(pk=id)
         if request.method == 'POST':
-            product = Products.objects.get(pk=id)
             product.delete()
-            messages.success(request,'Product deleted succesfully! ')
+            messages.success(request, 'Product deleted successfully!')
             return redirect('/admin/product_list')
-        else:
-            product = Products.objects.get(pk=id)
-            data = {
-                'product': product
-            }
-            return render(request, 'admin/delete_product.html', data)
-        
+        return render(request, 'admin/delete_product.html', {'product': product})
     except Exception as e:
         return HttpResponse(f"An error occurred during delete: {e}")
-    
+
+
+@admin_required
 def update_product(request, productId):
     try:
+        product = Products.objects.get(pk=productId)
         if request.method == 'POST':
-            product = Products.objects.get(pk=productId)
-            product.product_price = request.POST.get('price')
+            product.product_price    = request.POST.get('price')
             product.product_quantity = request.POST.get('quantity')
-            product.product_size = Product_Size.objects.get(pk=request.POST.get('product_size'))
+            product.product_size     = Product_Size.objects.get(pk=request.POST.get('product_size'))
             product.save()
-            messages.success(request,'Product updated succesfully! ')
-
-            data = {
-                'product': product,
-            }
+            messages.success(request, 'Product updated successfully!')
             return redirect('/admin/product_list')
-        else:
-            product = Products.objects.get(pk=productId)
-            product_size = Product_Size.objects.all()
-
-            data = {
-                'product': product,
-                'product_sizes': product_size
-            }
-            return render(request, 'admin/update_product.html', data)
+        data = {
+            'product':       product,
+            'product_sizes': Product_Size.objects.all()
+        }
+        return render(request, 'admin/update_product.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during update: {e}")
-    
+
+
+@admin_required
 def user_list(request):
     try:
-        users = Users.objects.select_related('gender')
+        users     = Users.objects.select_related('gender')
         low_stock = Products.objects.filter(product_quantity__lte=10).select_related('product_gender', 'product_size')
         data = {
-            'users': users,
+            'users':     users,
             'low_stock': low_stock
         }
         return render(request, 'admin/user_list.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during user list retrieval: {e}")
+
+
+@admin_required
 def admin_stack(request):
     try:
         products = Products.objects.all().order_by('-created_at')
@@ -499,6 +536,8 @@ def admin_stack(request):
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
 
+
+@admin_required
 def admin_update_stock(request):
     if request.method == 'POST':
         try:
@@ -514,6 +553,8 @@ def admin_update_stock(request):
             messages.error(request, f'Error updating stock: {e}')
     return redirect('/admin/stack')
 
+
+@admin_required
 def admin_delete_product(request):
     if request.method == 'POST':
         try:
@@ -528,24 +569,25 @@ def admin_delete_product(request):
             messages.error(request, f'Error deleting product: {e}')
     return redirect('/admin/stack')
 
+
+@admin_required
 def delete_user(request, user_id):
     try:
         if request.method == 'POST':
             user = Users.objects.get(pk=user_id)
             user.delete()
-            messages.success(request, f'User deleted successfully.')
+            messages.success(request, 'User deleted successfully.')
             return redirect('/admin/user_list')
         return redirect('/admin/user_list')
     except Exception as e:
         return HttpResponse(f"An error occurred: {e}")
 
 
+@admin_required
 def admin_history(request):
     try:
-        user = get_current_user(request)
-        users = Users.objects.get(pk=user.user_id)
         orders_qs = History.objects.all().select_related('product_name', 'payment_method').order_by('-created_at')
-        
+
         grouped_orders = {}
         for order in orders_qs:
             key = order.order_ref or order.history_id
@@ -555,19 +597,19 @@ def admin_history(request):
             grouped_orders[key]['total'] += order.product_price * order.quantity
 
         subtotal = sum(int(order.product_price if order.product_price else 0) * order.quantity for order in orders_qs)
-        
+
         data = {
             'grouped_orders': grouped_orders,
-            'subtotal': subtotal,
-            'user': users
+            'subtotal':       subtotal,
         }
         return render(request, 'admin/admin_history.html', data)
     except Exception as e:
         return HttpResponse(f"An error occurred during history retrieval: {e}")
 
+
+@admin_required
 def admin_remove_history(request):
     try:
-        user = get_current_user(request)
         History.objects.all().delete()
         messages.success(request, 'Order history cleared successfully.')
         return redirect('/admin/admin_history')

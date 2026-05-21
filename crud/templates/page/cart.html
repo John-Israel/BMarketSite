@@ -65,7 +65,7 @@
                 <a href="/page/cart/update?cart_id={{ item.cart_id }}&amp;delta=-1"
                    class="w-7 h-7 rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-black text-white text-sm font-bold flex items-center justify-center transition-all duration-200">&#8722;</a>
                 <span class="text-white font-semibold text-sm" name="quantity" id="quantity-{{ forloop.index0 }}">{{ item.quantity }}</span>
-                {% if item.quantity >= 10 %}
+                {% if item.quantity >= item.product_name.product_quantity %}
                   <span class="w-7 h-7 rounded-full bg-gray-800 text-gray-600 text-sm font-bold flex items-center justify-center cursor-not-allowed">&#43;</span>
                 {% else %}
                   <a href="/page/cart/update?cart_id={{ item.cart_id }}&amp;delta=1"

@@ -11,45 +11,96 @@
 
   <div class="max-w-screen-xl mx-auto mb-6 text-center">
     <h1 class="text-4xl font-bold text-yellow-400 tracking-widest uppercase">Our Collection</h1>
-    <p class="text-gray-400 mt-2 text-sm tracking-wide">Step Into Excellence</p>
+    <p class="text-gray-400 mt-2 text-sm tracking-wide">Happy shopping!</p>
     <div class="mx-auto mt-3 w-24 h-0.5 bg-yellow-400 rounded-full"></div>
   </div>
 
-  <!-- Search Bar -->
-  <div class="max-w-screen-xl mx-auto mb-5 flex justify-center">
+  <!-- Search + Filter Row -->
+  <div class="max-w-screen-xl mx-auto mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+
+    <!-- Search Bar -->
     <div class="relative w-full max-w-md">
       <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
       </svg>
-      <input type="text" id="search" name="search" placeholder="Search by name or brand..."
+      <input type="text" id="search" placeholder="Search by name or brand..."
         class="w-full bg-gray-900 border border-gray-700 text-white text-sm rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 placeholder-gray-500 transition-all duration-200">
     </div>
-  </div>
 
-  <!-- Gender Filter Tabs -->
-  <div class="max-w-screen-xl mx-auto mb-8 flex justify-center gap-3">
-    <button class="filter-btn active-tab text-xs font-semibold px-5 py-2 rounded-xl border transition-all duration-200 bg-yellow-400 text-black border-yellow-400"
-            data-gender="all">
-      All
-    </button>
-    <button class="filter-btn text-xs font-semibold px-5 py-2 rounded-xl border transition-all duration-200 bg-gray-900 text-gray-400 border-gray-800"
-            data-gender="male">
-      Men
-    </button>
-    <button class="filter-btn text-xs font-semibold px-5 py-2 rounded-xl border transition-all duration-200 bg-gray-900 text-gray-400 border-gray-800"
-            data-gender="female">
-      Women
-    </button>
+    <!-- Filter Button + Dropdown -->
+    <div class="relative" id="filter-wrapper">
+      <button id="filter-toggle"
+        class="flex items-center gap-2 bg-gray-900 border border-gray-700 text-gray-300 text-sm font-semibold px-5 py-3 rounded-xl hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0 2.25 2.25M17.25 9v12"/>
+        </svg>
+        Filter
+        <svg id="filter-chevron" class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <!-- Dropdown Panel -->
+      <div id="filter-panel"
+        class="hidden absolute right-0 mt-2 w-52 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+
+        <!-- Brand Section -->
+        <div class="px-4 pt-4 pb-2">
+          <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Brand</p>
+          <ul id="brand-list" class="space-y-0.5">
+            <li>
+              <span class="brand-btn w-full text-left text-sm px-3 py-2 rounded-lg text-yellow-400 bg-gray-800 font-semibold transition-all duration-150" data-brand="all">All Brands</span>
+              
+            </li>
+            {% for product in products %}
+              <!-- JS will build this dynamically -->
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="mx-4 my-1 border-t border-gray-800"></div>
+
+        <!-- Gender Section -->
+        <div class="px-4 pt-2 pb-3">
+          <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Gender</p>
+          <ul class="space-y-0.5">
+            <li>
+              <button class="gender-btn w-full text-left text-sm px-3 py-2 rounded-lg text-yellow-400 bg-gray-800 font-semibold transition-all duration-150" data-gender="all">
+                All Genders
+              </button>
+            </li>
+            <li>
+              <button class="gender-btn w-full text-left text-sm px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-150" data-gender="male">
+                Male
+              </button>
+            </li>
+            <li>
+              <button class="gender-btn w-full text-left text-sm px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-150" data-gender="female">
+                Female
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="mx-4 mb-3 border-t border-gray-800"></div>
+        <div class="px-4 pb-4">
+          <button id="reset-filters"
+            class="w-full text-xs text-gray-500 hover:text-yellow-400 py-1.5 transition-colors duration-150">
+            Reset Filters
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Product Grid -->
   <div class="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" id="product-grid">
-
     {% for product in products %}
     <div class="product-card opacity-0 translate-y-6 transition-all duration-500 bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 cursor-pointer"
         data-product-id="{{ product.product_id }}"
         data-name="{{ product.product_name }}"
-        data-brand="{{ product.product_brand }}"
+        data-brand="{{ product.product_brand|lower }}"
+        data-brand-display="{{ product.product_brand }}"
         data-size="{{ product.product_size.product_size }}"
         data-price="{{ product.product_price }}"
         data-quantity="{{ product.product_quantity }}"
@@ -57,30 +108,33 @@
         data-img="{% if product.product_image %}{{ product.product_image.url }}{% endif %}">
 
       <div class="relative overflow-hidden h-56 bg-gray-800">
-
-        <!-- Skeleton -->
         <div class="card-skeleton absolute inset-0 bg-gray-800 animate-pulse z-10"></div>
 
-        {% if product.product_image %}
-          <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
-              class="product-img w-full h-full object-contain p-3 transition-all duration-500 opacity-0 relative z-20"
-              onload="
-                this.classList.remove('opacity-0');
-                this.classList.add('opacity-100');
-                this.closest('.relative').querySelector('.card-skeleton').style.display='none';
-              ">
-        {% else %}
+        {% if product.product_quantity == 0 %}
           <div class="w-full h-full flex items-center justify-center relative z-20">
-            <span class="text-gray-400 text-xs">No Image</span>
+            <span class="text-red-400 text-xs font-semibold uppercase tracking-widest">Out of Stock</span>
+          </div>
+        {% else %}
+          {% if product.product_image %}
+            <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+                class="product-img w-full h-full object-contain p-3 transition-all duration-500 opacity-0 relative z-20"
+                onload="
+                  this.classList.remove('opacity-0');
+                  this.classList.add('opacity-100');
+                  this.closest('.relative').querySelector('.card-skeleton').style.display='none';
+                ">
+          {% else %}
+            <div class="w-full h-full flex items-center justify-center relative z-20">
+              <span class="text-gray-400 text-xs">No Image</span>
+            </div>
+          {% endif %}
+
+          <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300 z-30">
+            <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
+              Add to Cart
+            </button>
           </div>
         {% endif %}
-
-        <div class="product-overlay absolute inset-0 flex items-center justify-center transition-all duration-300 z-30">
-          <button class="overlay-btn opacity-0 bg-yellow-400 text-black font-bold py-2 px-5 rounded-xl text-sm tracking-wide transition-all duration-300">
-            Add to Cart
-          </button>
-        </div>
-
       </div>
 
       <div class="p-4">
@@ -90,14 +144,11 @@
         <p class="text-gray-400 text-xs mt-1">{{ product.product_gender.product_gender }}</p>
         <div class="flex items-center justify-between mt-3">
           <span class="text-yellow-400 font-bold text-lg">&#8369;{{ product.product_price }}</span>
-          <span class="text-xs text-gray-500">Quantity: {{ product.product_quantity }}</span>
-
+          <span class="text-xs text-gray-500">Qty: {{ product.product_quantity }}</span>
         </div>
       </div>
-
     </div>
     {% endfor %}
-
   </div>
 
   <!-- Scroll loader -->
@@ -107,13 +158,13 @@
     <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-bounce" style="animation-delay: 0.3s"></div>
   </div>
 
-  <!-- No results message -->
+  <!-- No results -->
   <div id="no-results" class="hidden text-center py-16">
     <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
     </svg>
     <p class="text-gray-500 text-lg font-semibold">No products found</p>
-    <p class="text-gray-600 text-sm mt-1">Try a different search term</p>
+    <p class="text-gray-600 text-sm mt-1">Try adjusting your filters</p>
   </div>
 
 </div>
@@ -121,7 +172,7 @@
 <script>
   const CSRF = '{{ csrf_token }}';
   const PAGE_SIZE = 8;
-  let currentPage = 1;
+  let currentPage = 0;
   let isLoading = false;
   let filteredCards = [];
 
@@ -129,7 +180,125 @@
   const scrollLoader = document.getElementById('scroll-loader');
   const noResults = document.getElementById('no-results');
 
-  // ── LAZY LOAD ON REFRESH (reveal cards one by one) ──
+  let activeBrand  = 'all';
+  let activeGender = 'all';
+  let searchQuery  = '';
+
+  // ── BUILD BRAND LIST FROM DATA ATTRS ──────────────────────────────────────
+  const brandSet = new Set();
+  allCards.forEach(c => {
+    const b = c.dataset.brand;
+    if (b && b !== 'none' && b !== '') brandSet.add(b);
+  });
+
+  const brandList = document.getElementById('brand-list');
+  brandSet.forEach(brand => {
+    const li = document.createElement('li');
+    li.innerHTML = `<button class="brand-btn w-full text-left text-sm px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-150" data-brand="${brand}">${brand.charAt(0).toUpperCase() + brand.slice(1)}</button>`;
+    brandList.appendChild(li);
+  });
+
+  // ── FILTER DROPDOWN TOGGLE ────────────────────────────────────────────────
+  const filterToggle  = document.getElementById('filter-toggle');
+  const filterPanel   = document.getElementById('filter-panel');
+  const filterChevron = document.getElementById('filter-chevron');
+
+  filterToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const open = !filterPanel.classList.contains('hidden');
+    filterPanel.classList.toggle('hidden', open);
+    filterChevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+  });
+
+  document.addEventListener('click', function() {
+    filterPanel.classList.add('hidden');
+    filterChevron.style.transform = 'rotate(0deg)';
+  });
+
+  filterPanel.addEventListener('click', e => e.stopPropagation());
+
+  // ── SHARED FILTER LOGIC ───────────────────────────────────────────────────
+  function applyFilters() {
+    allCards.forEach(card => {
+      card.style.display = 'none';
+      card.classList.add('opacity-0', 'translate-y-6');
+    });
+
+    filteredCards = allCards.filter(card => {
+      const matchBrand  = activeBrand  === 'all' || card.dataset.brand  === activeBrand;
+      const matchGender = activeGender === 'all' || card.dataset.gender === activeGender;
+      const matchSearch = searchQuery  === ''    ||
+        card.dataset.name.toLowerCase().includes(searchQuery) ||
+        card.dataset.brand.toLowerCase().includes(searchQuery);
+      return matchBrand && matchGender && matchSearch;
+    });
+
+    currentPage = 0;
+
+    if (filteredCards.length === 0) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+      revealCards(filteredCards, 0, PAGE_SIZE);
+    }
+  }
+
+  // ── BRAND FILTER ──────────────────────────────────────────────────────────
+  document.getElementById('brand-list').addEventListener('click', function(e) {
+    const btn = e.target.closest('.brand-btn');
+    if (!btn) return;
+    activeBrand = btn.dataset.brand;
+
+    document.querySelectorAll('.brand-btn').forEach(b => {
+      b.classList.remove('text-yellow-400', 'bg-gray-800', 'font-semibold');
+      b.classList.add('text-gray-400');
+    });
+    btn.classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
+    btn.classList.remove('text-gray-400');
+
+    applyFilters();
+  });
+
+  // ── GENDER FILTER ─────────────────────────────────────────────────────────
+  document.querySelectorAll('.gender-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      activeGender = this.dataset.gender;
+
+      document.querySelectorAll('.gender-btn').forEach(b => {
+        b.classList.remove('text-yellow-400', 'bg-gray-800', 'font-semibold');
+        b.classList.add('text-gray-400');
+      });
+      this.classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
+      this.classList.remove('text-gray-400');
+
+      applyFilters();
+    });
+  });
+
+  // ── RESET ─────────────────────────────────────────────────────────────────
+  document.getElementById('reset-filters').addEventListener('click', function() {
+    activeBrand  = 'all';
+    activeGender = 'all';
+
+    document.querySelectorAll('.brand-btn, .gender-btn').forEach(b => {
+      b.classList.remove('text-yellow-400', 'bg-gray-800', 'font-semibold');
+      b.classList.add('text-gray-400');
+    });
+    document.querySelector('.brand-btn[data-brand="all"]').classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
+    document.querySelector('.gender-btn[data-gender="all"]').classList.add('text-yellow-400', 'bg-gray-800', 'font-semibold');
+
+    applyFilters();
+    filterPanel.classList.add('hidden');
+    filterChevron.style.transform = 'rotate(0deg)';
+  });
+
+  // ── SEARCH ────────────────────────────────────────────────────────────────
+  document.getElementById('search').addEventListener('input', function() {
+    searchQuery = this.value.trim().toLowerCase();
+    applyFilters();
+  });
+
+  // ── REVEAL / LAZY LOAD ────────────────────────────────────────────────────
   function revealCards(cards, startIndex, count) {
     const end = Math.min(startIndex + count, cards.length);
     for (let i = startIndex; i < end; i++) {
@@ -143,66 +312,32 @@
   }
 
   function init() {
-    // Hide all cards first
     allCards.forEach(card => {
       card.style.display = 'none';
       card.classList.add('opacity-0', 'translate-y-6');
     });
-
     filteredCards = [...allCards];
-
-    // Show skeleton shimmer briefly then reveal first page
-    setTimeout(() => {
-      revealCards(filteredCards, 0, PAGE_SIZE);
-    }, 500);
+    setTimeout(() => revealCards(filteredCards, 0, PAGE_SIZE), 500);
   }
 
-  // ── INFINITE SCROLL ──
+  // ── INFINITE SCROLL ───────────────────────────────────────────────────────
   function loadMore() {
     const totalPages = Math.ceil(filteredCards.length / PAGE_SIZE);
     if (isLoading || currentPage >= totalPages) return;
-
     isLoading = true;
     scrollLoader.classList.remove('hidden');
-
     setTimeout(() => {
-      const start = currentPage * PAGE_SIZE;
-      revealCards(filteredCards, start, PAGE_SIZE);
+      revealCards(filteredCards, currentPage * PAGE_SIZE, PAGE_SIZE);
       scrollLoader.classList.add('hidden');
       isLoading = false;
     }, 700);
   }
 
   window.addEventListener('scroll', () => {
-    const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
-    if (nearBottom) loadMore();
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) loadMore();
   });
 
-  // ── SEARCH ──
-  document.getElementById('search').addEventListener('input', function () {
-    const query = this.value.trim().toLowerCase();
-
-    allCards.forEach(card => {
-      card.style.display = 'none';
-      card.classList.add('opacity-0', 'translate-y-6');
-    });
-
-    filteredCards = allCards.filter(card => {
-      const name  = card.dataset.name.toLowerCase();
-      const brand = card.dataset.brand.toLowerCase();
-      return name.includes(query) || brand.includes(query);
-    });
-
-    currentPage = 0;
-
-    if (filteredCards.length === 0) {
-      noResults.classList.remove('hidden');
-    } else {
-      noResults.classList.add('hidden');
-      revealCards(filteredCards, 0, PAGE_SIZE);
-    }
-  });
-
+  // ── TOAST ─────────────────────────────────────────────────────────────────
   function showToast(message, type) {
     var isSuccess = (type !== 'error');
     var el = document.createElement('div');
@@ -225,29 +360,13 @@
     }, 3000);
   }
 
-  document.querySelectorAll('.filter-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-tab', 'bg-yellow-400', 'text-black'));
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-gray-900', 'text-gray-400', 'border-gray-800'));
-      this.classList.add('active-tab');
-      this.classList.remove('bg-gray-900', 'text-gray-400', 'border-gray-800');
-      var targetGender = this.dataset.gender;
-      allCards.forEach(card => {
-        card.style.display = 'none';
-        card.classList.add('opacity-0', 'translate-y-6');
-      });
-      filteredCards = allCards.filter(card =>
-        targetGender === 'all' || card.dataset.gender === targetGender
-      );
-      currentPage = 0;
-      revealCards(filteredCards, 0, PAGE_SIZE);
-    });
-  });
-
+  // ── CARD HOVER + ADD TO CART ──────────────────────────────────────────────
   document.querySelectorAll('.product-card').forEach(function(card) {
     var img     = card.querySelector('.product-img');
     var overlay = card.querySelector('.product-overlay');
     var btn     = card.querySelector('.overlay-btn');
+
+    if (!overlay || !btn) return;
 
     card.addEventListener('mouseenter', function() {
       if (img) img.style.transform  = 'scale(1.08)';
@@ -304,7 +423,6 @@
     });
   });
 
-  // ── INIT ──
   init();
 </script>
 {% endblock 'content' %}
