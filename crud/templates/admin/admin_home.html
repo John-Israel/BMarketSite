@@ -168,7 +168,6 @@
           </table>
         </div>
 
-        <!-- 👇 Added this footer button -->
         <div class="mt-4 pt-4 border-t border-gray-800 text-center">
           <a href="/admin/admin_history"
             class="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 text-xs font-semibold transition-colors duration-200">
@@ -186,31 +185,29 @@
   </div>
 </div>
 
+<script src="{% static 'js/skeleton.js' %}"></script>
+
 <script>
   setTimeout(function () {
+    // Welcome toast
+    var toast = document.createElement('div');
+    toast.textContent = '👋 Welcome back, Admin!';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1f2937;color:#facc15;border:1px solid #facc15;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:9999;opacity:0;transform:translateY(16px);transition:opacity 0.4s ease,transform 0.4s ease;';
+    document.body.appendChild(toast);
 
-    // Reveal banner
-    document.getElementById('welcome-banner').classList.remove('opacity-0', 'translate-y-6');
-
-    // Hide stats skeleton, show real
-    document.getElementById('stats-skeleton').style.display = 'none';
-    const statsReal = document.getElementById('stats-real');
-    statsReal.classList.remove('hidden');
     setTimeout(function () {
-      statsReal.classList.remove('opacity-0', 'translate-y-6');
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
     }, 50);
 
-    // Hide bottom skeleton, show real
     setTimeout(function () {
-      document.getElementById('bottom-skeleton').style.display = 'none';
-      const bottomReal = document.getElementById('bottom-real');
-      bottomReal.classList.remove('hidden');
-      setTimeout(function () {
-        bottomReal.classList.remove('opacity-0', 'translate-y-6');
-      }, 50);
-    }, 150);
-
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(16px)';
+      setTimeout(function () { toast.remove(); }, 400);
+    }, 3500);
   }, 600);
 </script>
+
+
 
 {% endblock 'content' %}

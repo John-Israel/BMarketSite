@@ -68,5 +68,18 @@
         </form>
     </div>
 </div>
+<script src="{% static 'js/shindo_adminhome.js' %}"></script>
+
+<script>
+  setTimeout(function () {
+    var t = document.createElement('div');
+    t.textContent = 'Update stack huh?';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1f2937;color:#facc15;border:1px solid #facc15;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;opacity:0;transition:opacity 0.4s ease;z-index:9999;';
+    document.body.appendChild(t);
+    setTimeout(function () { t.style.opacity = '1'; }, 50);
+    setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 400); }, 3500);
+  }, 600);
+</script>
+
 
 {% endblock 'content' %}
