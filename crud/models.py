@@ -22,7 +22,7 @@ class Users(models.Model):
     email = models.CharField(max_length=128, blank=True)
     username = models.CharField(max_length=64, blank=False, unique=True)
     password = models.CharField(max_length=255, blank=False)
-    profile_pic = models.ImageField(upload_to='profile_pics/', blank=False, unique=False, default='profile_pics/default_profile_pic.png')
+    profile_pic = models.ImageField(upload_to='profile_pics/', blank=False, unique=False, default='profile_pics/default_profile_pic.png')  # ← ADDED
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -46,6 +46,7 @@ class Product_Gender(models.Model):
     product_gender = models.CharField(max_length=128, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 class Product_Size(models.Model):
     class Meta:
         db_table = 'product_size_tbl'
@@ -87,9 +88,6 @@ class History(models.Model):
     payment_method = models.ForeignKey(Payment, on_delete=models.CASCADE)
     product_price = models.IntegerField(default=1, blank=False)
     product_total = models.IntegerField(default=1, blank=False)
-    # @property
-    # def product_price(self):
-    #     return self.product.product_price
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

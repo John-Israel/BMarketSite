@@ -6,6 +6,7 @@ from .models import Payment, Product_Size, Users, Genders, Admin, Products, Prod
 import json, uuid
 from django.db.models import Sum
 from functools import wraps
+from django.db import IntegrityError
 
 
 # ── Session Guard Decorators ──────────────────────────────────────────────────
@@ -39,7 +40,74 @@ def Log_in(request):
             return render(request, 'page/Log_in.html')
     except Exception as e:
         return HttpResponse(f"An error occurred during login: {e}")
-    
+
+## ── Paste these functions into your views.py ────────────────────────────────
+
+def forgot_password(request):
+    try:
+        if request.method == 'POST':
+            step = request.POST.get('step', '1')
+
+            if step == '1':
+                email = request.POST.get('email', '').strip()
+                user  = Users.objects.filter(email=email).first()
+
+                if user is None:
+                    messages.error(request, 'No account found with that email address.')
+                    return redirect('/page/forgot_password')
+
+                # Store verified email in session so step-2 knows who to update
+                request.session['reset_email'] = email
+                # Render same template but now show the reset-password form
+                return render(request, 'page/forgot_password.html', {
+                    'step': 2,
+                    'email': email,
+                })
+
+            # ── STEP 2: reset password ────────────────────────────────────
+            elif step == '2':
+                email            = request.session.get('reset_email')
+                new_password     = request.POST.get('new_password', '')
+                confirm_password = request.POST.get('confirm_password', '')
+
+                if not email:
+                    messages.error(request, 'Session expired. Please start over.')
+                    return redirect('/page/forgot_password')
+
+                if new_password != confirm_password:
+                    messages.error(request, 'Passwords do not match.')
+                    return render(request, 'page/forgot_password.html', {
+                        'step': 2,
+                        'email': email,
+                    })
+
+                if len(new_password) < 8:
+                    messages.error(request, 'Password must be at least 8 characters.')
+                    return render(request, 'page/forgot_password.html', {
+                        'step': 2,
+                        'email': email,
+                    })
+
+                user = Users.objects.filter(email=email).first()
+                if user is None:
+                    messages.error(request, 'User not found.')
+                    return redirect('/page/forgot_password')
+
+                user.password = make_password(new_password)
+                user.save()
+
+                # Clean up session
+                del request.session['reset_email']
+
+                messages.success(request, 'Password updated successfully! You can now log in.')
+                return redirect('/page/Log_in')
+
+        # GET – show step 1
+        return render(request, 'page/forgot_password.html', {'step': 1})
+
+    except Exception as e:
+        return HttpResponse(f"An error occurred: {e}")
+
 def login_required(view_func):
     """Redirects to login page if no user session is found."""
     @wraps(view_func)
@@ -73,12 +141,10 @@ def get_current_user(request):
         return None
 
 
-
 def log_out(request):
     request.session.flush()
     messages.success(request, 'You have been logged out.')
     return redirect('/page/Log_in')
-
 
 # ── User Views ────────────────────────────────────────────────────────────────
 
@@ -228,7 +294,6 @@ def payment(request):
                 product_price  = item.product_price,
                 product_total  = subtotal
             )
-            # ← Fixed: stock deduction now runs per item, inside the loop
             product = Products.objects.get(pk=item.product_name_id)
             product.product_quantity = max(product.product_quantity - item.quantity, 0)
             product.save()
@@ -298,50 +363,57 @@ def contact(request):
 
 # ── Sign Up ───────────────────────────────────────────────────────────────────
 
-from django.db import IntegrityError  # add this import at the top
-
 def sign_up(request):
     try:
         if request.method == 'POST':
-            fullname       = request.POST.get('full_name')
-            gender         = request.POST.get('gender')
-            birthdate      = request.POST.get('birth_date')
-            address        = request.POST.get('address')
-            contactNumber  = request.POST.get('contact_number')
-            email          = request.POST.get('email')
-            username       = request.POST.get('username')
-            password       = request.POST.get('password')
+            fullname         = request.POST.get('full_name')
+            gender           = request.POST.get('gender')
+            birthdate        = request.POST.get('birth_date')
+            address          = request.POST.get('address')
+            contactNumber    = request.POST.get('contact_number')
+            email            = request.POST.get('email')
+            username         = request.POST.get('username')
+            password         = request.POST.get('password')
             confirm_password = request.POST.get('confirm_password')
-            profile_pic    = request.FILES.get('profile_pic')
+            profile_pic      = request.FILES.get('profile_pic')
+            security_question = request.POST.get('security_question', '').strip()
+            security_answer   = request.POST.get('security_answer', '').strip().lower()
 
             if password != confirm_password:
                 messages.error(request, 'Passwords do not match!')
-                return redirect('/users/add')
+                return redirect('/page/sign_up')
 
             if len(password) < 8:
                 messages.error(request, 'Password must be at least 8 characters!')
-                return redirect('/users/add')
+                return redirect('/page/sign_up')
 
             hashed_password = make_password(password)
 
             Users.objects.create(
-                full_name      = fullname,
-                gender         = Genders.objects.get(pk=gender),
-                birthdate      = birthdate,
-                address        = address,
-                contact_number = contactNumber,
-                email          = email,
-                username       = username,
-                password       = hashed_password,
-                profile_pic    = profile_pic
+                full_name         = fullname,
+                gender            = Genders.objects.get(pk=gender),
+                birthdate         = birthdate,
+                address           = address,
+                contact_number    = contactNumber,
+                email             = email,
+                username          = username,
+                password          = hashed_password,
+                profile_pic       = profile_pic,
+                security_question = security_question,
+                security_answer   = make_password(security_answer),
             )
             messages.success(request, 'Account created successfully!')
             return redirect('/page/Log_in')
         else:
             data = {'genders': Genders.objects.all()}
             return render(request, 'page/sign_up.html', data)
+
+    except IntegrityError:
+        messages.error(request, 'Username or email is already taken. Please choose another.')
+        return redirect('/page/sign_up')
     except Exception as e:
-        return HttpResponse(f"An error occurred during sign up: {e}")
+        messages.error(request, f'An unexpected error occurred: {e}')
+        return redirect('/page/Log_in')
 
 
 # ── Manage Account ────────────────────────────────────────────────────────────

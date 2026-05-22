@@ -1,90 +1,101 @@
 {% load static %}
 
-<script>
-  (function () {
-    const dark = localStorage.getItem('theme') !== 'light';
-    document.documentElement.classList.toggle('dark', dark);
-  })();
-</script>
+<style>
+  html:not(.dark) .light-nav        { background-color: #f9fafb !important; }
+  html:not(.dark) .light-nav-border { border-color: #e5e7eb !important; }
+  html:not(.dark) .light-text       { color: #111827 !important; }
+  html:not(.dark) .light-dropdown   { background-color: #f3f4f6 !important; border-color: #d1d5db !important; }
 
-<nav class="bg-gray-900 dark:bg-gray-900 light-nav fixed w-full z-20 top-0 start-0 border-b border-gray-700 dark:border-gray-700 light-nav-border transition-colors duration-300">
-  <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+  /* Mobile drawer slide animation */
+  #mobile-menu {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+  }
+  #mobile-menu.open {
+    max-height: 600px;
+    opacity: 1;
+  }
 
-    <!-- Brand -->
-    <a href="#" class="flex items-center space-x-2 rtl:space-x-reverse">
-      <div class="h-9 w-9 bg-yellow-400 rounded-xl flex items-center justify-center flex-shrink-0">
-        <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M13.5 2C10 2 7 4.5 5.5 8H4a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1h1.05A7.5 7.5 0 0 0 11 17.93V20H9v2h6v-2h-2v-2.07A7.5 7.5 0 0 0 21 11V9.5C21 5.36 17.64 2 13.5 2z"/>
-        </svg>
-      </div>
-      <span class="self-center text-xl text-white dark:text-white light-text-dark font-bold whitespace-nowrap tracking-wide transition-colors duration-300">ShoeShop</span>
-    </a>
+  /* Hamburger → X */
+  .ham-line { transition: transform 0.25s ease, opacity 0.2s ease; transform-origin: center; }
+  .menu-open .ham-top { transform: translateY(6px) rotate(45deg); }
+  .menu-open .ham-mid { opacity: 0; transform: scaleX(0); }
+  .menu-open .ham-bot { transform: translateY(-6px) rotate(-45deg); }
 
-    <!-- Mobile toggle -->
-    <button data-collapse-toggle="navbar-default" type="button"
-            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-200
-                   rounded-base md:hidden hover:bg-gray-700
-                   focus:outline-none focus:ring-2 focus:ring-gray-600"
-            aria-controls="navbar-default" aria-expanded="false">
-      <span class="sr-only">Open main menu</span>
-      <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-           width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h14"/>
-      </svg>
-    </button>
+  /* Dropdown fade */
+  .dd-fade { animation: ddFade 0.18s ease forwards; }
+  @keyframes ddFade {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
 
-    <!-- Nav links -->
-    <div class="hidden w-full md:flex md:items-center md:w-auto md:gap-6" id="navbar-default">
-      <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-700 rounded-base
-                 bg-gray-800 md:flex-row md:gap-6 md:mt-0 md:border-0 md:bg-gray-900 dark:md:bg-gray-900 light-nav
-                 rtl:space-x-reverse items-center transition-colors duration-300">
+<nav class="bg-gray-900 dark:bg-gray-900 light-nav fixed w-full z-20 top-0 start-0
+            border-b border-gray-700 dark:border-gray-700 light-nav-border transition-colors duration-300">
+  <div class="max-w-screen-xl mx-auto px-4">
 
-        <!-- Home -->
-        <li>
-          <a href="/admin/admin_home"
-             class="block py-2 px-3 text-yellow-400 rounded md:bg-transparent md:text-yellow-400 md:p-0"
-             aria-current="page">
-            Home
-          </a>
-        </li>
+    <!-- ── Top bar ── -->
+    <div class="flex items-center justify-between h-16">
 
-        <!-- Products -->
-        <li>
-          <a href="/admin/product_list"
-             class="flex items-center gap-1.5 py-2 px-3 text-gray-200 dark:text-gray-200 light-text-dark rounded
-                    hover:bg-gray-700 md:hover:bg-transparent md:border-0
-                    md:hover:text-yellow-400 md:p-0 transition-colors duration-300">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <path d="M16 10a4 4 0 0 1-8 0"/>
-            </svg>
-            Products
-          </a>
-        </li>
+      <!-- Brand -->
+      <a href="#" class="flex items-center gap-2 flex-shrink-0">
+        <div class="h-9 w-9 bg-yellow-400 rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M13.5 2C10 2 7 4.5 5.5 8H4a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1h1.05A7.5 7.5 0 0 0 11 17.93V20H9v2h6v-2h-2v-2.07A7.5 7.5 0 0 0 21 11V9.5C21 5.36 17.64 2 13.5 2z"/>
+          </svg>
+        </div>
+        <span class="text-xl font-bold tracking-wide text-white dark:text-white light-text transition-colors duration-300">ShoeShop</span>
+      </a>
 
-        <!-- Userlist -->
-        <li>
-          <a href="/admin/user_list"
-             class="flex items-center gap-1.5 py-2 px-3 text-gray-200 dark:text-gray-200 light-text-dark rounded
-                    hover:bg-gray-700 md:hover:bg-transparent md:border-0
-                    md:hover:text-yellow-400 md:p-0 transition-colors duration-300">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-              <line x1="1" y1="10" x2="23" y2="10"/>
-            </svg>
-            Userlist
-          </a>
-        </li>
+      <!-- Right controls -->
+      <div class="flex items-center gap-1">
 
-        <!-- Notification Bell -->
-        <li class="relative" id="notif-wrapper">
+        <!-- Desktop links -->
+        <ul class="hidden md:flex items-center gap-0.5 font-medium">
+          <li>
+            <a href="/admin/admin_home"
+               class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-yellow-400 text-sm hover:bg-gray-800 transition-colors duration-200">
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="/admin/product_list"
+               class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-200 light-text text-sm hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              Products
+            </a>
+          </li>
+          <li>
+            <a href="/admin/user_list"
+               class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-200 light-text text-sm hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              Userlist
+            </a>
+          </li>
+          <li>
+            <a href="/admin/admin_history"
+               class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-200 light-text text-sm hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/>
+              </svg>
+              History
+            </a>
+          </li>
+        </ul>
+
+        <!-- Notification bell -->
+        <div class="relative" id="notif-wrapper">
           <button onclick="toggleNotif()"
                   class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors duration-200">
             <svg class="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
             </svg>
-            <!-- Badge -->
             {% if low_stock %}
             <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
               {{ low_stock|length }}
@@ -92,9 +103,9 @@
             {% endif %}
           </button>
 
-          <!-- Kung mag scroll ka padalom -->
+          <!-- Notif dropdown -->
           <div id="notif-dropdown"
-              class="hidden absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
+               class="hidden dd-fade absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl shadow-black/40 z-50 overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-700 flex items-center justify-between">
               <p class="text-white font-bold text-sm">Stock Alerts</p>
               {% if low_stock %}
@@ -146,30 +157,15 @@
               </a>
             </div>
           </div>
-        </li>
+        </div><!-- /notif-wrapper -->
 
-        <li>
-          <a href="/admin/admin_history"
-             class="flex items-center gap-1.5 py-2 px-3 text-gray-200 dark:text-gray-200 light-text-dark rounded
-                    hover:bg-gray-700 md:hover:bg-transparent md:border-0
-                    md:hover:text-yellow-400 md:p-0 transition-colors duration-300">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/>
-            </svg>
-            History
-          </a>
-        </li>
-
-        <!-- Settings Dropdown -->
-        <li class="relative" id="settings-menu-wrapper">
-          <button id="settings-btn"
-                  onclick="toggleSettingsMenu()"
-                  class="flex items-center gap-1.5 py-2 px-3 text-gray-200 dark:text-gray-200 light-text-dark rounded
-                         hover:bg-gray-700 md:hover:bg-transparent md:border-0
-                         md:hover:text-yellow-400 md:p-0 transition-colors duration-300 select-none">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>
+        <!-- Settings dropdown (desktop only) -->
+        <div class="hidden md:block relative" id="settings-menu-wrapper">
+          <button onclick="toggleSettingsMenu()"
+                  class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-200 light-text text-sm
+                         hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200 select-none">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
             </svg>
             Settings
@@ -179,11 +175,8 @@
             </svg>
           </button>
 
-          <!-- Dropdown panel -->
           <div id="settings-dropdown"
-               class="hidden absolute right-0 mt-2 w-56 bg-gray-800 dark:bg-gray-800 light-dropdown border border-gray-700 rounded-2xl shadow-2xl shadow-black/40 overflow-hidden z-50 transition-colors duration-300">
-
-            <!-- Shindo Mode Toggle -->
+               class="hidden dd-fade absolute right-0 mt-2 w-56 bg-gray-800 light-dropdown border border-gray-700 rounded-2xl shadow-2xl shadow-black/40 z-50 overflow-hidden transition-colors duration-300">
             <div class="flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition-colors duration-150 cursor-pointer"
                  onclick="toggleDarkMode()">
               <div class="flex items-center gap-3">
@@ -200,68 +193,155 @@
                   <p class="text-gray-400 text-xs" id="theme-label">Currently off</p>
                 </div>
               </div>
-    
               <div id="dark-toggle-pill" class="relative w-10 h-5 rounded-full transition-colors duration-300 bg-gray-500">
                 <div id="dark-toggle-dot" class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 left-0.5"></div>
               </div>
             </div>
-
           </div>
-        </li>
+        </div><!-- /settings-menu-wrapper -->
 
-      </ul>
-      <!-- Logout button -->
-      <a href="/page/Log_in"
-         class="flex items-center gap-2 py-2 px-4 bg-red-600 hover:bg-red-700
-                text-white text-sm font-semibold rounded-xl transition-all duration-200
-                shadow-md shadow-red-600/20 hover:shadow-red-600/40 active:scale-95 ml-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        Log out
-      </a>
-    </div>
+        <!-- Logout (desktop) -->
+        <a href="/page/Log_in"
+           class="hidden md:flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md shadow-red-600/20 hover:shadow-red-600/40 active:scale-95 ml-1">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Log out
+        </a>
+
+        <!-- Hamburger (mobile/tablet) -->
+        <button id="hamburger-btn"
+                onclick="toggleMobileMenu()"
+                class="md:hidden flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-gray-800 hover:bg-gray-700 transition-colors duration-200 gap-1.5 p-2.5 ml-1">
+          <span class="ham-line ham-top block w-full h-0.5 bg-gray-200 rounded"></span>
+          <span class="ham-line ham-mid block w-full h-0.5 bg-gray-200 rounded"></span>
+          <span class="ham-line ham-bot block w-full h-0.5 bg-gray-200 rounded"></span>
+        </button>
+
+      </div><!-- /right controls -->
+    </div><!-- /top bar -->
+
+    <!-- ── Mobile / Tablet drawer ── -->
+    <div id="mobile-menu" class="md:hidden">
+      <div class="pb-4 pt-1 space-y-0.5">
+        <a href="/admin/admin_home"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-yellow-400 font-semibold text-sm bg-yellow-400/10">
+          Home
+        </a>
+        <a href="/admin/product_list"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-200 light-text text-sm hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          Products
+        </a>
+        <a href="/admin/user_list"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-200 light-text text-sm hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          Userlist
+        </a>
+        <a href="/admin/admin_history"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-200 light-text text-sm hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/>
+          </svg>
+          History
+        </a>
+
+        <!-- Dark mode row (mobile) -->
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-800 transition-colors duration-200 cursor-pointer"
+             onclick="toggleDarkMode()">
+          <div class="flex items-center gap-2 text-gray-200 light-text text-sm">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+            </svg>
+            Dark Mode
+          </div>
+          <div id="dark-toggle-pill-mobile" class="relative w-10 h-5 rounded-full transition-colors duration-300 bg-gray-500">
+            <div id="dark-toggle-dot-mobile" class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 left-0.5"></div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-700 !my-2"></div>
+
+        <!-- Logout (mobile) -->
+        <a href="/page/Log_in"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-all duration-200 active:scale-95">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Log out
+        </a>
+      </div>
+    </div><!-- /mobile-menu -->
 
   </div>
 </nav>
 
-<!-- Gasiga button -->
-<style>
-  html:not(.dark) .light-nav          { background-color: #f9fafb !important; }
-  html:not(.dark) .light-nav-border   { border-color: #e5e7eb !important; }
-  html:not(.dark) .light-text-dark    { color: #111827 !important; }
-  html:not(.dark) .light-dropdown     { background-color: #f3f4f6 !important; border-color: #d1d5db !important; }
-  html:not(.dark) nav ul.md\:bg-gray-900 { background-color: #f9fafb !important; }
-</style>
-
 <script>
+  /* ── Mobile menu ── */
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const btn  = document.getElementById('hamburger-btn');
+    const open = menu.classList.contains('open');
+    menu.classList.toggle('open', !open);
+    btn.classList.toggle('menu-open', !open);
+  }
+
+  /* ── Desktop settings dropdown ── */
   function toggleSettingsMenu() {
     const dd = document.getElementById('settings-dropdown');
     const ch = document.getElementById('settings-chevron');
-    const open = !dd.classList.contains('hidden');
-    dd.classList.toggle('hidden', open);
-    ch.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    const isOpen = !dd.classList.contains('hidden');
+    dd.classList.toggle('hidden', isOpen);
+    ch.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
   }
 
+  /* ── Notification dropdown ── */
+  function toggleNotif() {
+    document.getElementById('notif-dropdown').classList.toggle('hidden');
+  }
+
+  /* ── Close dropdowns on outside click ── */
   document.addEventListener('click', function (e) {
-    const wrapper = document.getElementById('settings-menu-wrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-      document.getElementById('settings-dropdown').classList.add('hidden');
-      document.getElementById('settings-chevron').style.transform = 'rotate(0deg)';
+    const settingsWrapper = document.getElementById('settings-menu-wrapper');
+    if (settingsWrapper && !settingsWrapper.contains(e.target)) {
+      document.getElementById('settings-dropdown')?.classList.add('hidden');
+      if (document.getElementById('settings-chevron'))
+        document.getElementById('settings-chevron').style.transform = 'rotate(0deg)';
+    }
+    const notifWrapper = document.getElementById('notif-wrapper');
+    if (notifWrapper && !notifWrapper.contains(e.target)) {
+      document.getElementById('notif-dropdown')?.classList.add('hidden');
     }
   });
 
+  /* ── Dark mode ── */
   function applyTheme(dark) {
     document.documentElement.classList.toggle('dark', dark);
-    document.getElementById('theme-icon-moon').classList.toggle('hidden', dark);
-    document.getElementById('theme-icon-sun').classList.toggle('hidden', !dark);
-    document.getElementById('theme-label').textContent = dark ? 'Currently on' : 'Currently off';
+
+    // Icon swap
+    document.getElementById('theme-icon-moon')?.classList.toggle('hidden', dark);
+    document.getElementById('theme-icon-sun')?.classList.toggle('hidden', !dark);
+
+    // Label
+    const label = document.getElementById('theme-label');
+    if (label) label.textContent = dark ? 'Currently on' : 'Currently off';
+
+    // Desktop pill
     const pill = document.getElementById('dark-toggle-pill');
     const dot  = document.getElementById('dark-toggle-dot');
-    pill.style.backgroundColor = dark ? '#facc15' : '#6b7280';
-    dot.style.left = dark ? '1.25rem' : '0.125rem';
+    if (pill) pill.style.backgroundColor = dark ? '#facc15' : '#6b7280';
+    if (dot)  dot.style.left = dark ? '1.25rem' : '0.125rem';
+
+    // Mobile pill
+    const pillM = document.getElementById('dark-toggle-pill-mobile');
+    const dotM  = document.getElementById('dark-toggle-dot-mobile');
+    if (pillM) pillM.style.backgroundColor = dark ? '#facc15' : '#6b7280';
+    if (dotM)  dotM.style.left = dark ? '1.25rem' : '0.125rem';
   }
 
   function toggleDarkMode() {
@@ -270,20 +350,10 @@
     applyTheme(next);
   }
 
+  /* ── Single init on load — reads localStorage, no duplicate IIFE ── */
   (function () {
     const saved = localStorage.getItem('theme');
-    const dark = saved === 'dark';
-    applyTheme(dark);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved ? saved === 'dark' : prefersDark);
   })();
-  function toggleNotif() {
-    const dd = document.getElementById('notif-dropdown');
-    dd.classList.toggle('hidden');
-  }
-
-  document.addEventListener('click', function (e) {
-    const wrapper = document.getElementById('notif-wrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-      document.getElementById('notif-dropdown').classList.add('hidden');
-    }
-  });
 </script>
