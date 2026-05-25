@@ -93,9 +93,7 @@
     </div>
   </div>
 
-  <!-- Active Filter Pills -->
   <div id="active-pills" class="max-w-screen-xl mx-auto mb-6 flex flex-wrap gap-2 justify-center min-h-[28px]">
-    <!-- Injected by JS -->
   </div>
 
   <!-- Product Grid -->
@@ -200,7 +198,7 @@
   let activeGender = 'all';
   let searchQuery  = '';
 
-  // ── BUILD BRAND LIST FROM DATA ATTRS ──────────────────────────────────────
+
   const brandSet = new Set();
   allCards.forEach(c => {
     const b = c.dataset.brand;
@@ -214,7 +212,7 @@
     brandList.appendChild(li);
   });
 
-  // ── BADGE + PILLS ─────────────────────────────────────────────────────────
+ 
   function updateBadgeAndPills() {
     let count = 0;
     if (activeBrand  !== 'all') count++;
@@ -257,7 +255,7 @@
     return pill;
   }
 
-  // ── SYNC BUTTON HIGHLIGHTS ────────────────────────────────────────────────
+ // highlights for active filters
   function syncBrandButtons() {
     document.querySelectorAll('.brand-btn').forEach(b => {
       const on = b.dataset.brand === activeBrand;
@@ -278,7 +276,7 @@
     });
   }
 
-  // ── SHARED FILTER LOGIC ───────────────────────────────────────────────────
+ // filters
   function applyFilters() {
     allCards.forEach(card => {
       card.style.display = 'none';
@@ -305,7 +303,7 @@
     }
   }
 
-  // ── FILTER DROPDOWN TOGGLE ────────────────────────────────────────────────
+ // filter dropdown
   const filterToggle  = document.getElementById('filter-toggle');
   const filterPanel   = document.getElementById('filter-panel');
   const filterChevron = document.getElementById('filter-chevron');
@@ -323,8 +321,7 @@
   });
 
   filterPanel.addEventListener('click', e => e.stopPropagation());
-
-  // ── BRAND FILTER ──────────────────────────────────────────────────────────
+// brand
   document.getElementById('brand-list').addEventListener('click', function(e) {
     const btn = e.target.closest('.brand-btn');
     if (!btn) return;
@@ -333,7 +330,7 @@
     applyFilters();
   });
 
-  // ── GENDER FILTER ─────────────────────────────────────────────────────────
+// gender
   document.querySelectorAll('.gender-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       activeGender = this.dataset.gender;
@@ -342,7 +339,7 @@
     });
   });
 
-  // ── RESET ─────────────────────────────────────────────────────────────────
+// reset
   document.getElementById('reset-filters').addEventListener('click', function() {
     activeBrand  = 'all';
     activeGender = 'all';
@@ -353,13 +350,13 @@
     filterChevron.style.transform = 'rotate(0deg)';
   });
 
-  // ── SEARCH ────────────────────────────────────────────────────────────────
+// search
   document.getElementById('search').addEventListener('input', function() {
     searchQuery = this.value.trim().toLowerCase();
     applyFilters();
   });
 
-  // ── REVEAL / LAZY LOAD ────────────────────────────────────────────────────
+// lazy loading
   function revealCards(cards, startIndex, count) {
     const end = Math.min(startIndex + count, cards.length);
     for (let i = startIndex; i < end; i++) {
@@ -398,7 +395,7 @@
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) loadMore();
   });
 
-  // ── TOAST ─────────────────────────────────────────────────────────────────
+  // toast for add to cart
   function showToast(message, type) {
     var isSuccess = (type !== 'error');
     var el = document.createElement('div');
